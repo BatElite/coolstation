@@ -200,14 +200,15 @@ var/global/list/dirty_power_machines = list()
 			previous_adjacent_nodes -= non_break_node.propagate_netnum(non_break_node, an_netnum)
 
 	while(length(previous_adjacent_nodes))
-		var/datum/powernet/PN = new
-		powernets += PN
-		PN.number = length(powernets)
-		an_netnum = PN.number
 		var/datum/powernet_graph_node/orphaned_node = previous_adjacent_nodes[1]
 		if (orphaned_node.disposed)
 			previous_adjacent_nodes -= orphaned_node
 			continue
+		var/datum/powernet/PN = new
+		powernets += PN
+		PN.number = length(powernets)
+		an_netnum = PN.number
+		orphaned_node.propagate_netnum(orphaned_node, an_netnum)
 
 	if (dissolve_self)
 		qdel(src)
