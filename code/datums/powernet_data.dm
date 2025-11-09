@@ -208,7 +208,7 @@ var/global/list/dirty_power_machines = list()
 		powernets += PN
 		PN.number = length(powernets)
 		an_netnum = PN.number
-		orphaned_node.propagate_netnum(orphaned_node, an_netnum)
+		previous_adjacent_nodes -= orphaned_node.propagate_netnum(orphaned_node, an_netnum)
 
 	if (dissolve_self)
 		qdel(src)
