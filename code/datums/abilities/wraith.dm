@@ -197,7 +197,7 @@
 			boutput(usr, "<span class='alert'>You cannot force your consciousness into a body while corporeal.</span>")
 			return 1
 
-		if (!isitem(T) || istype(T, /obj/item/storage/bible))
+		if (!isitem(T) || istype(T, /obj/item/bible))
 			boutput(holder.owner, "<span class='alert'>You cannot possess this!</span>")
 			return 1
 
@@ -644,7 +644,7 @@
 		if (!t)
 			src.in_use = 0
 			return 1
-		var/obj/decal/cleanable/writing/spooky/G = make_cleanable(/obj/decal/cleanable/writing/spooky,T)
+		var/obj/decal/cleanable/writing/spooky/G = new /obj/decal/cleanable/writing/spooky(T)
 		G.artist = user.key
 
 		logTheThing("station", user, null, "writes on [T] with [src] [log_loc(T)]: [t]")

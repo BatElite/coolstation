@@ -4,6 +4,8 @@
 /// Arguments given here are packaged in a list and given to _SendSignal
 #define SEND_SIGNAL(target, sigtype, arguments...) ( !target?.comp_lookup || !target.comp_lookup[sigtype] ? 0 : target._SendSignal(sigtype, list(target, ##arguments)) )
 
+#define SEND_COMPLEX_SIGNAL(target, sigtype, arguments...) SEND_SIGNAL(target, sigtype[2], ##arguments)
+
 #define GLOBAL_SIGNAL preMapLoad // guaranteed to exist and that's all that matters
 
 /**
@@ -16,6 +18,12 @@
 
 /// A wrapper for _AddComponent that allows us to pretend we're using normal named arguments
 #define AddComponent(arguments...) _AddComponent(list(##arguments))
+
+/// A wrapper for _LoadComponent that allows us to pretend we're using normal named arguments
+#define LoadComponent(arguments...) _LoadComponent(list(##arguments))
+
+/// Checks if a signal is "complex", i.e. it is handled by adding a special component and registering may have side effects and overhead
+#define IS_COMPLEX_SIGNAL(x) (length(x) == 2 && ispath(x[1], /datum/component/complexsignal))
 
 /**
 	* Return this from `/datum/component/Initialize` or `datum/component/OnTransfer` to have the component be deleted if it's applied to an incorrect type.
@@ -77,11 +85,17 @@
 #define COMSIG_ATOM_ENTERED "atom_entered"
 /// when this atom has clean_forensic called, send this signal.
 #define COMSIG_ATOM_CLEANED "atom_cleaned"
+/// when this atom is dragged onto something (usr, over_object, src_location, over_location, src_control, over_control, params)
+#define COMSIG_ATOM_MOUSEDROP "atom_mousedrop"
+/// when something is dragged onto this atom (object, usr, src_location, over_location, over_control, params)
+#define COMSIG_ATOM_MOUSEDROP_T "atom_mousedrop_t"
 
 // ---- turf signals ----
 
-/// when a turf is replaced by another turf (what)
-#define COMSIG_TURF_REPLACED "turf_replaced"
+/// sent to the turf_persistent before a turf is replaced by another turf (new_type)
+#define COMSIG_TURF_PRE_REPLACE "turf_replaced_pre"
+/// sent to the turf_persistent when a turf is replaced by another turf (new_turf)
+#define COMSIG_TURF_POST_REPLACE "turf_replaced_post"
 /// when a movable lands in a turf (thing, /datum/thrown_thing)
 #define COMSIG_TURF_LANDIN_THROWN "turf_landin"
 
@@ -101,6 +115,15 @@
 #define COMSIG_MOVABLE_FLOOR_REVEALED "mov_floor_revealed"
 /// when an AM changes contraband level (self_applied)
 #define COMSIG_MOVABLE_CONTRABAND_CHANGED "mov_contraband_changed"
+/// when the outermost movable in the .loc chain changes (thing, old_outermost_movable, new_outermost_movable)
+#define XSIG_OUTERMOST_MOVABLE_CHANGED list(/datum/component/complexsignal/outermost_movable, "mov_outermost_changed")
+/// When the outermost movable in the .loc chain moves to a new turf. (thing, old_turf, new_turf)
+#define XSIG_MOVABLE_TURF_CHANGED list(/datum/component/complexsignal/outermost_movable, "mov_turf_changed")
+/// When the outermost movable in the .loc chain moves to a new area. (thing, old_area, new_area)
+#define XSIG_MOVABLE_AREA_CHANGED list(/datum/component/complexsignal/outermost_movable, "mov_area_changed")
+/// when the z-level of a movable changes (works in nested contents) (thing, old_z_level, new_z_level)
+#define XSIG_MOVABLE_Z_CHANGED list(/datum/component/complexsignal/outermost_movable, "mov_z-level_changed")
+
 // ---- item signals ----
 
 /// When an item is equipped (user, slot)
@@ -135,6 +158,8 @@
 #define COMSIG_ITEM_PROCESS "itm_process"
 /// When an item is twirled
 #define COMSIG_ITEM_TWIRLED "itm_twirled"
+/// after an item is used to attack (target, user, reach, params)
+#define COMSIG_ITEM_AFTERATTACK "itm_after_atk"
 
 // ---- cloaking device signal ----
 /// Make cloaking devices turn off
@@ -338,4 +363,4 @@
 /// broadcast has reached 0 loops
 //#define COMSIG_BROADCAST_ENDED "broadcast_end"
 /// broadcast has stopped, possibly prematurely
-//#define COMSIG_BROADCAST_STOPPED "broadcast_stop"
+#define COMSIG_BROADCAST_STOPPED "broadcast_stop"

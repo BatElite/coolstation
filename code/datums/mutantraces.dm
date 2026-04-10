@@ -679,7 +679,7 @@
 		mob.see_in_dark = SEE_DARK_FULL
 
 	proc/flub()
-		playsound(mob, "sound/misc/boing/[rand(1,6)].ogg", 20, 1 )
+		playsound(mob, "sound/misc/boing/[rand(1,6)].ogg", 20, 1)
 		animate(mob, time = 1, pixel_y = 16, easing = ELASTIC_EASING)
 		animate(time = 1, pixel_y = 0, easing = ELASTIC_EASING)
 
@@ -1071,7 +1071,7 @@
 		blood_points = max(0,blood_points)
 		cleanable_tally += (prev_blood - blood_points)
 		if (cleanable_tally > 20)
-			make_cleanable(/obj/decal/cleanable/tracked_reagents/blood,get_turf(mob))
+			new /obj/decal/cleanable/tracked_reagents/blood(get_turf(mob))
 			cleanable_tally = 0
 
 		mob.max_health = blood_points * blood_to_health_scalar
@@ -1105,6 +1105,7 @@
 	decomposes = FALSE
 	race_mutation = /datum/bioEffect/mutantrace/skeleton
 	dna_mutagen_banned = FALSE
+	eye_state = "eyes_skeleton"
 
 	New(var/mob/living/carbon/human/M)
 		..()
@@ -1602,6 +1603,7 @@
 	l_limb_leg_type_mutantrace = /obj/item/parts/human_parts/leg/mutant/cat/left
 	mutant_appearance_flags = (NOT_DIMORPHIC | HAS_HUMAN_EYES | HAS_SPECIAL_HAIR | BUILT_FROM_PIECES | FIX_COLORS | TORSO_HAS_SKINTONE | SKINTONE_USES_PREF_COLOR_1 | HAS_EXTRA_DETAILS | WEARS_UNDERPANTS)
 	dna_mutagen_banned = FALSE
+	eye_state = "eyes_cat"
 
 	special_hair_1_icon = 'icons/mob/cat.dmi'
 	special_hair_1_state = "head_detail" //eyes and pink parts
@@ -1686,7 +1688,7 @@
 			mob.blood_color = "#22EE99"
 			M.bioHolder.AddEffect("mattereater")
 			M.bioHolder.AddEffect("jumpy")
-			M.bioHolder.AddEffect("vowelitis")
+			//M.bioHolder.AddEffect("vowelitis")
 			M.bioHolder.AddEffect("accent_brummie")
 
 
@@ -1696,7 +1698,7 @@
 				mob.blood_color = original_blood_color
 				mob.bioHolder.RemoveEffect("mattereater")
 				mob.bioHolder.RemoveEffect("jumpy")
-				mob.bioHolder.RemoveEffect("vowelitis")
+				//mob.bioHolder.RemoveEffect("vowelitis")
 				mob.bioHolder.RemoveEffect("accent_brummie")
 		original_blood_color = null
 		..()
@@ -1855,7 +1857,7 @@
 	l_limb_leg_type_mutantrace = /obj/item/parts/human_parts/leg/mutant/cow/left
 	mutant_appearance_flags = (NOT_DIMORPHIC | HAS_NO_SKINTONE | HAS_HUMAN_EYES | BUILT_FROM_PIECES | HAS_EXTRA_DETAILS | HAS_OVERSUIT_DETAILS | HAS_SPECIAL_HAIR | HEAD_HAS_OWN_COLORS | WEARS_UNDERPANTS)
 	color_channel_names = list("Horn Detail", "Hoof Detail")
-	eye_state = "eyes-cow"
+	eye_state = "eyes_cow"
 	dna_mutagen_banned = FALSE
 
 	New(var/mob/living/carbon/human/H)

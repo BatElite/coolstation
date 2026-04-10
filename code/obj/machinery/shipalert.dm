@@ -106,7 +106,7 @@ var/global/soundGeneralQuarters = sound('sound/machines/siren_generalquarters_qu
 		command_alert("All personnel, this is not a test. There is a confirmed, hostile threat on-board and/or near the station. Report to your stations. Prepare for the worst.", "Alert - Condition Red")
 		world << soundGeneralQuarters
 		broadcast = new(station_name, "Condition Red - General Emergency")
-		broadcast_controls.broadcast_start(broadcast, TRUE, -1, 1)
+		broadcast_controls.broadcast_start(broadcast, TRUE, set_loops = -1, process_immediately = TRUE)
 		//toggle on
 		shipAlertState = SHIP_ALERT_BAD
 
@@ -141,5 +141,5 @@ var/global/soundGeneralQuarters = sound('sound/machines/siren_generalquarters_qu
 	m_amt = 50
 	desc = "Like a normal hammer, but teeny."
 	stamina_damage = 33
-	stamina_cost = 18
-	stamina_crit_chance = 10
+//	stamina_cost = 18
+//	stamina_crit_chance = 10

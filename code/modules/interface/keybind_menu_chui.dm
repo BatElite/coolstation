@@ -38,7 +38,7 @@ chui/window/keybind_menu
 
 		html += "<tfoot><tr><td colspan=\"2\">[theme.generateButton("reset", "Reset All Keybinding Data (Caution!)")]</td></tr></tfoot></table>"
 
-		html += "<script language=\"JavaScript\">$(\".input\").on(\"change keyup paste\", function(){var elem=$(this); chui.winset(\"changed_key\", $.param({action:elem.attr(\"id\"), key:elem.val()}))})</script>"
+		html += "<script language=\"JavaScript\">$(\".input\").on(\"change keyup paste\", function(){var elem=$(this); chui.bycall(\"changed_key\", {action:elem.attr(\"id\"), key:elem.val()})})</script>"
 
 		return html.Join()
 
@@ -55,12 +55,18 @@ chui/window/keybind_menu
 					var/datum/keymap/keydat = new(changed_keys_rev) //this should only have the changed entries, for optimal merge
 					current_keymap.overwrite_by_action(keydat)
 					current_keymap.on_update(owner)
-					owner.cloud_put("custom_keybind_data", json_encode(changed_keys_rev))
-					boutput("<span class='notice'>Your custom keybinding data has been saved.</span>")
+					var/fetched_keylist = owner.cloud_get("custom_keybind_data")
+					var/new_keybind_data = list()
+					if (!isnull(fetched_keylist) && fetched_keylist != "") //The client has a list of custom keybinds.
+						new_keybind_data = json_decode(fetched_keylist)
+					for (var/i in changed_keys_rev)
+						new_keybind_data[i] = changed_keys_rev[i]
+					owner.cloud_put("custom_keybind_data", json_encode(new_keybind_data))
+					boutput(who, "<span class='notice'>Your custom keybinding data has been saved.</span>")
 			else if (id == "reset")
 				changed_keys = new/list()
-				owner.cloud_put("custom_keybind_data", null)
-				who.keymap = null //To prevent merge() from not overwriting old keybinds
+				owner.cloud_put("custom_keybind_data", "")
+				who.keymap = "" //To prevent merge() from not overwriting old keybinds
 				who.mob.reset_keymap() //Does successive calls to rebuild the keymap
 				boutput(who, "<span class='notice'>Your keybinding data has been reset. Please re-open the window.</span>")
 				Unsubscribe(who)

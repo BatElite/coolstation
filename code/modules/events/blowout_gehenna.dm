@@ -12,9 +12,7 @@
 		var/timetoreach = rand(30,60)
 		var/actualtime = timetoreach * 10 + timetoreachsec
 
-		for (var/mob/M in mobs)
-			M.flash(3 SECONDS)
-		var/sound/siren = sound('sound/misc/airraid_loop.ogg')
+		var/sound/siren = sound('sound/misc/airraid_loop_short.ogg')
 		siren.repeat = TRUE
 		siren.channel = 5
 		siren.volume = 75 // wire note: lets not deafen players with an air raid siren
@@ -22,7 +20,7 @@
 		command_alert("Extreme levels of radiation detected approaching the planet surface. All personnel have [timetoreach].[timetoreachsec] seconds to reach the tunnel level. This is not a test.", "Anomaly Alert")
 
 		var/datum/directed_broadcast/emergency/broadcast = new(station_name, "Radiation Storm", "[timetoreach] Seconds", "Seek shelter underground immediately. Do not use elevators.")
-		broadcast_controls.broadcast_start(broadcast, TRUE, -1, 1)
+		broadcast_controls.broadcast_start(broadcast, TRUE, set_loops = -1, process_immediately = TRUE)
 
 		SPAWN_DBG(0)
 			//The normal blowout zeroes out maint airlock access here
@@ -35,7 +33,7 @@
 				//Ignoring do_not_irradiate here
 				if (!A.irradiated)
 					A.irradiated = TRUE
-				A.icon_state = "bluenew" //gonna tryturf/ed cherenkov flavour
+				A.icon_state = "bluemild" //gonna tryturf/ed cherenkov flavour
 				for (var/turf/T in A.turfs)
 					//Might be interesting for folks to scour the desert for artifacts after, the odds of spawning are lower cause it spawned kinda a lot in testing
 					if (rand(0,1000) < 3 && (istype(T,/turf/floor) || istype(T, /turf/space/gehenna/desert)))
@@ -98,7 +96,6 @@
 				S.color = null
 	#endif
 */
-			for (var/mob/N in mobs)
-				N.flash(3 SECONDS)
+
 
 			//Cut out another sleep and the restoring of airlock access

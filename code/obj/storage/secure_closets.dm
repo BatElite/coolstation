@@ -4,6 +4,8 @@
 	soundproofing = 5
 	can_flip_bust = 1
 	p_class = 3
+	open_sound = "sound/impact_sounds/locker_open2.ogg"
+	close_sound = "sound/impact_sounds/lockerclose.ogg"
 
 /obj/storage/secure/closet/personal
 	name = "personal locker"
@@ -317,7 +319,7 @@
 					logTheThing("debug", null, null, "<b>Convair880:</b> couldn't find brig timer with ID [isnull(src.id) ? "*null*" : "[src.id]"] for automatic locker at [log_loc(src)].")
 		return
 
-	MouseDrop(over_object, src_location, over_location)
+	mouse_drop(over_object, src_location, over_location)
 		..()
 		if (isobserver(usr) || isintangible(usr))
 			return

@@ -415,7 +415,7 @@
 		return !open && cell?.charge>0 && (wires & wire_power1) && (wires & wire_power2)
 
 	// mousedrop the bot to unload the bot
-	MouseDrop(var/turf/T)
+	mouse_drop(var/turf/T)
 		if(!istype(T))
 			T = get_turf(T)
 
@@ -530,7 +530,7 @@
 		if(src.mode <= 0) return TRUE
 		if(bloodiness && issimulatedturf(src.last_loc))
 			//boutput(world, "at ([x],[y]) moving to ([next.x],[next.y])")
-			var/obj/decal/cleanable/tracked_reagents/blood/tracks/B = make_cleanable(/obj/decal/cleanable/tracked_reagents/blood/tracks, loc)
+			var/obj/decal/cleanable/tracked_reagents/blood/tracks/B = new /obj/decal/cleanable/tracked_reagents/blood/tracks( loc)
 			var/newdir = get_dir(loc, last_loc)
 			if(newdir == dir)
 				B.set_dir(newdir)
@@ -557,7 +557,7 @@
 
 				mode = 6
 				SPAWN_DBG(0.2 SECONDS)
-					src.navigate_to(src.target, src.bot_move_delay, exclude = src.path[1])
+					src.navigate_to(src.target, src.bot_move_delay, exclude = src.path[1], max_dist = 180)
 					if(path)
 						blockcount = 0
 						src.visible_message("[src] makes a delighted ping!", "You hear a ping.")
@@ -595,7 +595,7 @@
 				reached_target = 0
 				mode = 2
 			KillPathAndGiveUp()
-			src.navigate_to(src.target, src.bot_move_delay)
+			src.navigate_to(src.target, src.bot_move_delay, max_dist = 180)
 			if(src.path)
 				icon_state = "mulebot[(wires & wire_mobavoid) == wire_mobavoid]"
 				return
@@ -665,9 +665,6 @@
 					M.changeStatus("weakened", 5 SECONDS)
 					M.force_laydown_standup()
 		..()
-
-	alter_health()
-		return get_turf(src)
 
 	// called from mob/living/carbon/human/HasEntered()
 	// when mulebot is in the same loc

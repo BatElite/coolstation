@@ -1455,7 +1455,7 @@ ABSTRACT_TYPE(/obj/item/podarmor)
 			succeeding = 1
 			did_warp = 1
 
-			playsound(src.loc, "warp", 50, 1, 0.1, 0.7)
+			playsound(src.loc, "warp", 50, 1, SOUND_RANGE_STANDARD, 0.7)
 
 			var/obj/portal/P = new()
 			P.set_loc(get_turf(src))
@@ -1482,7 +1482,7 @@ ABSTRACT_TYPE(/obj/item/podarmor)
 				while(src)
 					step(src,src.dir)
 					if(prob(50))
-						make_cleanable(/obj/decal/cleanable/robot_debris/gib, src.loc)
+						new /obj/decal/cleanable/robot_debris/gib( src.loc)
 					if(prob(20) && pilot)
 						boutput(pilot, "<span class='alert'>You fall out of the rapidly disintegrating escape pod!</span>")
 						src.leave_pod(pilot)

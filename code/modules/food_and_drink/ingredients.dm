@@ -29,7 +29,7 @@
 		if (src.blood <= 0) return ..()
 
 		if (istype(T))
-			make_cleanable( /obj/decal/cleanable/tracked_reagents/blood,T)
+			new  /obj/decal/cleanable/tracked_reagents/blood(T)
 			blood--
 		..()
 
@@ -141,7 +141,7 @@
 		if (src.cybermeat == 1)
 			playsound(src.loc, "sound/impact_sounds/Slimy_Splat_1.ogg", 100, 1)
 			if (istype(T))
-				make_cleanable(/obj/decal/cleanable/oil,T)
+				new /obj/decal/cleanable/oil(T)
 				..()
 			else
 				return..()
@@ -208,8 +208,8 @@
 		var/turf/T = get_turf(A)
 		src.visible_message("<span class='alert'>[src] splats onto the floor messily!</span>")
 		playsound(src.loc, "sound/impact_sounds/Slimy_Splat_1.ogg", 100, 1)
-		make_cleanable(/obj/decal/cleanable/eggsplat,T)
-		make_cleanable(/obj/decal/cleanable/eggshell,T)
+		new /obj/decal/cleanable/eggsplat(T)
+		new /obj/decal/cleanable/eggshell(T)
 		qdel (src)
 
 /obj/item/reagent_containers/food/snacks/ingredient/egg/hardboiled
@@ -496,7 +496,7 @@
 			if (baton.is_active) //baton is on
 				if (user.a_intent != "harm")
 					if (user.traitHolder.hasTrait("training_security"))
-						playsound(src, "sound/impact_sounds/Energy_Hit_3.ogg", 30, 1, -1) //bit quieter than a baton hit
+						playsound(src, "sound/impact_sounds/Energy_Hit_3.ogg", 30, 1, SOUND_RANGE_MODERATE) //bit quieter than a baton hit
 						user.visible_message("<span class='notice'>[user] [pick("expertly", "deftly", "casually", "smoothly")] baton-fries the dough, yielding a tasty donut.</span>", group = "batonfry")
 						var/obj/item/reagent_containers/food/snacks/donut/result = new /obj/item/reagent_containers/food/snacks/donut(src.loc)
 						user.u_equip(src)
@@ -506,7 +506,7 @@
 						boutput(user, "<span class='alert'>You just aren't experienced enough to baton-fry.</span>")
 				else
 					user.visible_message("<b class='alert'>[user] tries to baton fry the dough, but fries [his_or_her(user)] hand instead!</b>")
-					playsound(src, "sound/impact_sounds/Energy_Hit_3.ogg", 30, 1, -1)
+					playsound(src, "sound/impact_sounds/Energy_Hit_3.ogg", 30, 1, SOUND_RANGE_MODERATE)
 					user.do_disorient(baton.stamina_damage, weakened = baton.stun_normal_weakened * 10, disorient = 80) //cut from batoncode to bypass all the logging stuff
 					user.emote("scream")
 			else

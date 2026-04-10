@@ -487,7 +487,7 @@ var/global/datum/spooktober_ghost_handler/spooktober_GH = new()
 
 		var/turf/T = get_turf(holder.owner)
 		var/S = pick("sound/ambience/nature/Wind_Cold1.ogg", "sound/ambience/nature/Wind_Cold2.ogg", "sound/ambience/nature/Wind_Cold3.ogg","sound/ambience/nature/Cave_Bugs.ogg", "sound/ambience/nature/Glacier_DeepRumbling1.ogg", "sound/effects/bones_break.ogg", "sound/effects/glitchy1.ogg",	"sound/effects/gust.ogg", "sound/effects/static_horror.ogg", "sound/effects/blood.ogg", "sound/effects/kaboom.ogg")
-		playsound(T, S, 30, 0, -1)
+		playsound(T, S, 30, 0, SOUND_RANGE_STANDARD)
 		boutput(holder.owner, "<span class='alert'>You make a spooky sound!</span>")
 
 
@@ -568,7 +568,7 @@ var/global/datum/spooktober_ghost_handler/spooktober_GH = new()
 		if (!T && !user && !string)
 			return
 
-		var/obj/decal/cleanable/writing/spooky/G = make_cleanable(/obj/decal/cleanable/writing/spooky,T)
+		var/obj/decal/cleanable/writing/spooky/G = new /obj/decal/cleanable/writing/spooky(T)
 		G.artist = user.key
 
 		logTheThing("station", user, null, "writes on [T] with [src] [log_loc(T)]: [string]")

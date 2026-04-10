@@ -381,6 +381,33 @@ ABSTRACT_TYPE(/obj/item/clothing/shoes)
 	AddComponent(/datum/component/wearertargeting/tripsalot, list(SLOT_SHOES))
 	AddComponent(/datum/component/wearertargeting/crayonwalk, list(SLOT_SHOES))
 
+/obj/item/clothing/shoes/moffers
+	name = "moffers"
+	desc = "No moths were harmed in the making of these slippers."
+	icon_state = "moffers"
+	step_sound = "step_moff"
+	compatible_species = list("human", "cow")
+	step_lots = 1
+	step_priority = 999
+
+/obj/item/clothing/shoes/clown_shoes/attackby(obj/item/W as obj, mob/user as mob) //moffers construction using clown shoes and mothroach hides
+	if (istype(W, /obj/item/material_piece/cloth/mothroachhide))
+		var/obj/item/material_piece/cloth/mothroachhide/C = W
+		if (C.amount <= 1)
+			boutput(user, "You don't have enough hide to add to \the [src.name]")
+		else
+			boutput(user, "<span class='notice'>You begin adding \the [C.name] to \the [src.name].</span>")
+			if (!do_after(user, 3 SECONDS))
+				boutput(user, "<span class='alert'>You were interrupted!</span>")
+				return ..()
+			else
+				C.change_stack_amount(-2)
+				user.drop_item()
+				var/obj/item/clothing/shoes/moffers/N = new /obj/item/clothing/shoes/moffers/(get_turf(src))
+				qdel(src)
+				boutput(user, "You have successfully created \a [N]!")
+	return ..()
+
 /obj/item/clothing/shoes/flippers
 	name = "flippers"
 	desc = "A pair of rubber flippers that improves swimming ability when worn."
@@ -512,11 +539,12 @@ ABSTRACT_TYPE(/obj/item/clothing/shoes)
 	tooltip_flags = REBUILD_DIST | REBUILD_USER
 
 	get_desc(var/dist, var/mob/user)
+		var/extra
 		if (user.mind && user.mind.assigned_role == "Head of Security")
-			. = "They really make you look tough and respectable."
+			extra = "They really make you look tough and respectable."
 		else
-			. = "Must have been all the licking no doubt!"
-		. = ..()
+			extra = "Must have been all the licking no doubt!"
+		return extra
 
 /obj/item/clothing/shoes/swat/knight // so heavy you can't get shoved!
 	name = "combat sabatons"
@@ -536,6 +564,17 @@ ABSTRACT_TYPE(/obj/item/clothing/shoes)
 	setupProperties()
 		..()
 		setProperty("coldprot", 15)
+
+/obj/item/clothing/shoes/winterboots
+	name = "winter boots"
+	desc = "Thick boots to keep your toes thawed."
+	icon_state = "winter"
+	step_sound = "step_military" //these boots are for walking or somethijng idk
+	step_priority = STEP_PRIORITY_LOW
+
+	setupProperties()
+		..()
+		setProperty("coldprot", 20)
 
 /obj/item/clothing/shoes/gogo
 	name = "go-go boots"

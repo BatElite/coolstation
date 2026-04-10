@@ -157,7 +157,7 @@
 	is_open_container()
 		return 2
 
-	proc/update_icon()
+	update_icon()
 		if (src.portable) // no need here
 			return
 		if (src.mess)
@@ -800,7 +800,7 @@
 	proc/look_busy(var/big = 0)
 		if (big)
 			animate_shake(src,5,rand(3,8),rand(3,8))
-			playsound(src.loc, pick(src.sounds_function), 50, 2)
+			playsound(src.loc, pick(src.sounds_function), 40, 2)
 		else
 			animate_shake(src,3,rand(1,4),rand(1,4))
 
@@ -1112,7 +1112,7 @@
 		actions.start(new /datum/action/bar/icon/put_in_reclaimer(G.affecting, src, G, 50), user)
 		return
 
-	proc/update_icon(var/update_grindpaddle=0)
+	update_icon(var/update_grindpaddle=0)
 		var/fluid_level = ((src.reagents.total_volume >= (src.reagents.maximum_volume * 0.6)) ? 2 : (src.reagents.total_volume >= (src.reagents.maximum_volume * 0.2) ? 1 : 0))
 
 		src.icon_state = "grinder[fluid_level]"

@@ -101,7 +101,7 @@
 		user.Browse(buildHtml(), "window=nfab;size=550x650;title=Nano-fabricator;fade_in=0;can_resize=0", 1)
 		return
 
-	MouseDrop(over_object, src_location, over_location)
+	mouse_drop(over_object, src_location, over_location)
 		if(over_object == src)
 			boutput(usr, "<span class='notice'>You reset the output location of [src]!</span>")
 			src.output_target = src.loc
@@ -135,6 +135,9 @@
 		else if (istype(over_object,/turf) && !over_object:density)
 			src.output_target = over_object
 			boutput(usr, "<span class='notice'>You set [src] to output to [over_object]!</span>")
+
+		else if(over_object == usr && HAS_ATOM_PROPERTY(usr, PROP_LIFT_ANYTHING))
+			return ..()
 
 		else
 			boutput(usr, "<span class='alert'>You can't use that as an output target.</span>")

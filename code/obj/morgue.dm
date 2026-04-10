@@ -106,9 +106,6 @@
 				return
 	return
 
-/obj/morgue/alter_health()
-	return src.loc
-
 /obj/morgue/attack_hand(mob/user as mob)
 	if (src.connected && src.connected.loc != src)
 		for( var/atom/movable/A as mob|obj in src.connected.loc)
@@ -286,9 +283,6 @@
 				return
 	return
 
-/obj/crematorium/alter_health()
-	return src.loc
-
 /obj/crematorium/attack_hand(mob/user as mob)
 //	if (cremating) AWW MAN! THIS WOULD BE SO MUCH MORE FUN ... TO WATCH
 //		user.show_message("<span class='alert'>Uh-oh, that was a bad idea.</span>", 1)
@@ -414,7 +408,7 @@
 			playsound(src.loc, "sound/machines/ding.ogg", 50, 1)
 
 			while (ashes > 0)
-				make_cleanable( /obj/decal/cleanable/ash,src)
+				new  /obj/decal/cleanable/ash(src)
 				ashes -= 1
 
 	return
@@ -657,7 +651,7 @@
 							H.update_colorful_parts()
 				if (emagged && isdead(M))
 					qdel(M)
-					make_cleanable( /obj/decal/cleanable/ash,src)
+					new  /obj/decal/cleanable/ash(src)
 
 		SPAWN_DBG(src.settime * 10)
 			if (src)

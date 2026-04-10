@@ -1,6 +1,6 @@
 //Unlockable traits? tied to achievements?
 #define TRAIT_STARTING_POINTS 1 //How many "free" points you get
-#define TRAIT_MAX 7			    //How many traits people can select at most.
+#define TRAIT_MAX 69			    //How many traits people can select at most.
 
 /proc/getTraitById(var/id)
 	. = traitList[id]
@@ -288,7 +288,7 @@
 				H.equip_new_if_possible(/obj/item/device/radio/headset/deaf, H.slot_ears)
 
 	onLife(var/mob/owner) //Just to be super safe.
-		if(!owner.ear_disability)
+		if(!owner.ear_permdeaf)
 			owner.bioHolder.AddEffect("deaf", 0, 0, 0, 1)
 
 // LANGUAGE - Yellow Border
@@ -598,9 +598,9 @@
 	isPositive = 1
 	category = "trinkets"
 
-/obj/trait/emaculate
-	name = "Emaculate (-1) \[Trinkets\]"
-	cleanName = "Emaculate"
+/obj/trait/immaculate
+	name = "Immaculate (-1) \[Trinkets\]"
+	cleanName = "Immaculate"
 	desc = "Start off with a rag as your trinket."
 	id = "emaculate"
 	points = -1
@@ -1145,6 +1145,14 @@ obj/trait/pilot
 	points = 2
 	isPositive = 0
 
+	onAdd(var/mob/owner)
+		..()
+		APPLY_ATOM_PROPERTY(owner, PROP_CLUTZ, "trait_clutz", 10)
+
+	onRemove(var/mob/owner)
+		..()
+		REMOVE_ATOM_PROPERTY(owner, PROP_CLUTZ, "trait_clutz")
+
 /obj/trait/leftfeet
 	name = "Two left feet (+1)"
 	cleanName = "Two left feet"
@@ -1187,6 +1195,17 @@ obj/trait/pilot
 	points = 0
 	isPositive = 0
 
+/obj/trait/monkey
+	name = "Clericanzee Error (0) \[Species\]"
+	cleanName = "Clericanzee Error"
+	icon_state = "monkeyT"
+	desc = "There's been a mistake at the lab and you've been picked out of your pen and sent to work. Technically an employee with paycheck and everything."
+	id = "monkey"
+	points = 0
+	isPositive = 0
+	category = "species"
+	mutantRace = /datum/mutantrace/monkey
+
 /obj/trait/lizard
 	name = "Reptilian (0) \[Species\]"
 	cleanName = "Reptilian"
@@ -1201,9 +1220,9 @@ obj/trait/pilot
 /obj/trait/cat
 	name = "Feline (0) \[Species\]"
 	cleanName = "Feline"
-	icon_state = "fertT"
+	icon_state = "catT"
 	desc = "Normal cat."
-	id = "cat" //need cat icon, but for now,
+	id = "cat"
 	points = 0
 	isPositive = 0
 	category = "species"
@@ -1242,6 +1261,17 @@ obj/trait/pilot
 	category = "species"
 	mutantRace = /datum/mutantrace/fert
 
+/obj/trait/ferg
+	name = "Phibian (0) \[Species\]"
+	cleanName = "Phibian"
+	icon_state = "fergT"
+	desc = "GET OUT."
+	id = "ferg"
+	points = 0
+	isPositive = 0
+	category = "species"
+	mutantRace = /datum/mutantrace/amphibian
+
 /obj/trait/skeleton
 	name = "Skeleton (-1) \[Species\]"
 	cleanName = "Skeleton"
@@ -1278,12 +1308,28 @@ obj/trait/pilot
 		if(ishuman(owner))
 			//skeleton, monkey, and human (null) are rarer
 			//also possible are squid and cat
-			var/our_pick = pick(prob(100); /datum/mutantrace/lizard, prob(100); /datum/mutantrace/roach, prob(50); /datum/mutantrace/skeleton, prob(100); /datum/mutantrace/fert, prob(50); null, prob(25); /datum/mutantrace/monkey, prob(100); /datum/mutantrace/cow, prob(100); /datum/mutantrace/ithillid, prob(100); /datum/mutantrace/cat, prob(100); /datum/mutantrace/birb)
+			var/our_pick = pick(prob(100); /datum/mutantrace/lizard, prob(100); /datum/mutantrace/roach, prob(50); /datum/mutantrace/skeleton, prob(100); /datum/mutantrace/fert, prob(50); null, prob(25); /datum/mutantrace/monkey, prob(100); /datum/mutantrace/cow, prob(100); /datum/mutantrace/ithillid, prob(100); /datum/mutantrace/cat, prob(100); /datum/mutantrace/birb, prob(100); /datum/mutantrace/amphibian)
 			if (our_pick)
 				var/mob/living/carbon/human/H = owner
 				H.set_mutantrace(our_pick)
 		return
 
+/obj/trait/stodgy
+	name = "Stodgy Pudding (0)"
+	cleanName = "Stodgy"
+	id = "stodgy"
+	icon_state = "stodgy"
+	desc = "You feel sturdy, like industrial mayo."
+	points = 0
+	isPositive = 1
+
+	onAdd(var/mob/owner)
+		..()
+		owner.SafeScale(1.25,1)
+
+	onRemove(var/mob/owner)
+		..()
+		owner.SafeScale(1/1.25,1)
 
 /obj/trait/teflon_colon
 	name = "Non-Stick Colon (-1)"
@@ -1334,6 +1380,16 @@ obj/trait/pilot
 	id = "super_slips"
 	desc = "You never were good at managing yourself slipping."
 	points = 1
+
+/obj/trait/hardcore
+	name = "Hardcore (-1)"
+	cleanName= "Hardcore"
+	id = "hardcore"
+	icon_state = "hardcoreT"
+	desc = "You were born with juice in your blood. You've been smoking since pre-K. To you, CoolStation is just a normal space station."
+	points = -1
+	isPositive = 1
+
 
 //Infernal Contract Traits
 /obj/trait/hair

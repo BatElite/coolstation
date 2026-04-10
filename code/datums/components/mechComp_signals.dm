@@ -235,10 +235,14 @@
 	//Need to use comsig_target instead of parent, to access .loc
 	if(A.loc != comsig_target.loc) //If these aren't sharing a container
 		var/obj/item/storage/mechanics/cabinet = null
-		if(istype(comsig_target.loc, /obj/item/storage/mechanics))
-			cabinet = comsig_target.loc
-		if(istype(A.loc, /obj/item/storage/mechanics))
-			cabinet = A.loc
+		if(istype(comsig_target, /obj/item))
+			var/obj/item/I = comsig_target
+			if (istype(I.stored?.linked_item, /obj/item/storage/mechanics))
+				cabinet = I.stored.linked_item
+		if(istype(A, /obj/item))
+			var/obj/item/I = A
+			if (istype(I.stored?.linked_item, /obj/item/storage/mechanics))
+				cabinet = I.stored.linked_item
 		if(cabinet)
 			if(!cabinet.anchored)
 				boutput(user,"<span class='alert'>Cannot create connection through an unsecured component housing</span>")
@@ -248,22 +252,56 @@
 		boutput(user, "<span class='alert'>Components need to be within a range of 14 meters to connect.</span>")
 		return
 
+	if(istype(user.find_tool_in_hand(TOOL_PULSING), /obj/item/device/multitool))
+		var/obj/item/device/multitool/multitool_used = user.find_tool_in_hand(TOOL_PULSING)
+		if(!multitool_used.mechComp_connect_mode)
+			boutput(user, "<span class='alert'>Multitool is not in connect mode!</span>")
+			return
+
 	var/typesel = input(user, "Use [parent] as:", "Connection Type") in list("Trigger", "Receiver", "*CANCEL*")
 	switch(typesel)
 		if("Trigger")
 			SEND_SIGNAL(A, _COMSIG_MECHCOMP_LINK, parent, user)
 		if("Receiver")
-			link_devices(null, A, user) //What do you want, an invitation? No signal needed!
+			link_devices(comsig_target, A, user) //What do you want, an invitation? No signal needed!
 		if("*CANCEL*")
 			return
 	return
 
 //We are in the scope of the receiver-component, our argument is the trigger
 //This feels weird/backwards, but it results in fewer SEND_SIGNALS & var/lists
-/datum/component/mechanics_holder/proc/link_devices(var/comsig_target, atom/trigger, mob/user)
+/datum/component/mechanics_holder/proc/link_devices(atom/comsig_target, atom/trigger, mob/user)
 	var/atom/receiver = parent
 	if(trigger in src.connected_outgoing)
 		boutput(user, "<span class='alert'>Can not create a direct loop between 2 components.</span>")
+		return
+	if(trigger == comsig_target)
+		boutput(user, "<span class='alert'>Component cannot be connected to itself.</span>")
+		return
+	if(trigger.loc != comsig_target.loc)
+		var/obj/item/storage/mechanics/cabinet = null
+		if(istype(comsig_target, /obj/item))
+			var/obj/item/I = comsig_target
+			if (istype(I.stored?.linked_item, /obj/item/storage/mechanics))
+				cabinet = I.stored.linked_item
+		if(istype(trigger, /obj/item))
+			var/obj/item/I = trigger
+			if (istype(I.stored?.linked_item, /obj/item/storage/mechanics))
+				cabinet = I.stored.linked_item
+		if(cabinet)
+			if(!cabinet.anchored)
+				boutput(user,"<span class='alert'>Cannot create connection through an unsecured component housing</span>")
+				return
+	if(!IN_RANGE(receiver, trigger, WIDE_TILE_WIDTH))
+		boutput(user, "<span class='alert'>These two components are too far apart to connect.</span>")
+		return
+	var/atom/movable/moveable_target = comsig_target
+	if(istype(moveable_target) && !moveable_target.anchored)
+		boutput(user, "<span class='alert'>[moveable_target] must be anchored to connect it.</span>")
+		return
+	var/atom/movable/moveable_trigger = trigger
+	if(istype(moveable_trigger) && !moveable_trigger.anchored)
+		boutput(user, "<span class='alert'>[moveable_trigger] must be anchored to connect it.</span>")
 		return
 	if(!src.inputs.len)
 		boutput(user, "<span class='alert'>[receiver.name] has no input slots. Can not connect [trigger.name] as Trigger.</span>")
@@ -297,6 +335,9 @@
 
 //If it's a multi-tool, let the user configure the device.
 /datum/component/mechanics_holder/proc/attackby(var/comsig_target, obj/item/W as obj, mob/user)
+	if(!ispulsingtool(W) || !isliving(user) || user.stat)
+		return 0
+
 	if(istype(comsig_target, /obj/machinery/door))
 		var/obj/machinery/door/hacked_door = comsig_target
 		if(hacked_door.p_open)
@@ -305,8 +346,24 @@
 		var/obj/machinery/vending/hacked_vendor = comsig_target
 		if(hacked_vendor.panel_open)
 			return
-	if(!ispulsingtool(W) || !isliving(user) || user.stat)
-		return 0
+
+	if(user.find_tool_in_hand(TOOL_PULSING))
+		if(istype(user.find_tool_in_hand(TOOL_PULSING), /obj/item/device/multitool))
+			var/obj/item/device/multitool/multitool_used = user.find_tool_in_hand(TOOL_PULSING)
+			if(multitool_used.mechComp_connect_mode)
+				if(!multitool_used.stored_component) //no stored component, store target.
+					multitool_used.stored_component = comsig_target
+					boutput(user, "<span class='alert'>Target component stored!.</span>")
+					return
+				else
+					boutput(user, "<span class='alert'>Connecting [W] to [src.parent] as Trigger!.</span>")
+					src.link_devices(comsig_target, multitool_used.stored_component, user) //stored compnent link as trigger.
+					return
+
+			if(multitool_used.standard_mode)
+				boutput(user, "<span class='alert'>Multitool not in a mechComp mode! Press X to fiddle to one!</span>")
+				return
+
 	if(length(src.configs))
 		var/selected_config = input("Select a config to modify!", "Config", null) as null|anything in src.configs
 		if(selected_config && in_interact_range(parent, user))

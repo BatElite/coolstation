@@ -234,7 +234,7 @@
 			playsound(src.loc, "sound/voice/animal/brullbar_scream.ogg", 75, 1)
 			src.visible_message("<span class='alert'><b>[src] howls!</b></span>", 1)
 			..()
-			playsound(src.loc, "sound/impact_sounds/Generic_Hit_1.ogg", 50, 1, -1)
+			playsound(src.loc, "sound/impact_sounds/Generic_Hit_1.ogg", 50, 1, SOUND_RANGE_STANDARD)
 			if(ismob(M))
 				M.changeStatus("stunned", 2 SECONDS)
 				M.changeStatus("weakened", 2 SECONDS)
@@ -263,7 +263,7 @@
 					sleep(1.5 SECONDS)
 					src.visible_message("<span class='alert'><B>[src]</B> ravenously eats the mangled brain remnants out of the decapitated head!</span>")
 					playsound(src.loc, "sound/voice/animal/brullbar_maul.ogg", 80, 1)
-					make_cleanable( /obj/decal/cleanable/tracked_reagents/blood,src.loc)
+					new  /obj/decal/cleanable/tracked_reagents/blood(src.loc)
 					src.target = null
 				else
 					src.visible_message("<span class='alert'><B>[src]</B> pounds on [BORG.name]'s head furiously!</span>")

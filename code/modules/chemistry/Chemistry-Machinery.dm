@@ -172,10 +172,12 @@
 			if(active)
 				dat += "Status: Active ([(target_temp > R.total_temperature) ? "Heating" : "Cooling"])<BR>"
 				dat += "Current Temperature: [R.total_temperature]<BR>"
+				dat += "Current Charge: [R.total_charge]<BR>"
 				dat += "<A href='byond://?src=\ref[src];stop=1'>Deactivate</A><BR><BR>"
 			else
 				dat += "Status: Inactive<BR>"
 				dat += "Current Temperature: [R.total_temperature]<BR>"
+				dat += "Current Charge: [R.total_charge]<BR>"
 				dat += "<A href='byond://?src=\ref[src];start=1'>Activate</A><BR><BR>"
 
 			for(var/reagent_id in R.reagent_list)
@@ -249,7 +251,7 @@
 		update_icon()
 		updateUsrDialog()
 
-	proc/update_icon()
+	update_icon()
 		src.overlays -= src.icon_beaker
 		if (src.beaker)
 			src.overlays += src.icon_beaker
@@ -265,7 +267,7 @@
 		else
 			src.icon_state = "heater"
 
-	MouseDrop(over_object, src_location, over_location)
+	mouse_drop(over_object, src_location, over_location)
 		if(!isliving(usr))
 			boutput(usr, "<span class='alert'>Only living mobs are able to set the Reagent Heater/Cooler's output target.</span>")
 			return
@@ -281,6 +283,9 @@
 		else if (istype(over_object,/turf/floor/))
 			src.output_target = over_object
 			boutput(usr, "<span class='notice'>You set the Reagent Heater/Cooler to output to [over_object]!</span>")
+
+		else if(over_object == usr && HAS_ATOM_PROPERTY(usr, PROP_LIFT_ANYTHING))
+			return ..()
 
 		else
 			boutput(usr, "<span class='alert'>You can't use that as an output target.</span>")
@@ -644,7 +649,7 @@
 			P.overlays += P.color_overlay
 			return
 
-	MouseDrop(over_object, src_location, over_location)
+	mouse_drop(over_object, src_location, over_location)
 		if(!isliving(usr))
 			boutput(usr, "<span class='alert'>Only living mobs are able to set the CheMaster 3000's output target.</span>")
 			return
@@ -660,6 +665,9 @@
 		else if (istype(over_object,/turf/floor/))
 			src.output_target = over_object
 			boutput(usr, "<span class='notice'>You set the CheMaster 3000 to output to [over_object]!</span>")
+
+		else if(over_object == usr && HAS_ATOM_PROPERTY(usr, PROP_LIFT_ANYTHING))
+			return ..()
 
 		else
 			boutput(usr, "<span class='alert'>You can't use that as an output target.</span>")

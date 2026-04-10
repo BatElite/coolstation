@@ -28,8 +28,8 @@ ABSTRACT_TYPE(/obj/item/old_grenade)
 	is_syndicate = 0
 	mats = 6
 	stamina_damage = 0
-	stamina_cost = 0
-	stamina_crit_chance = 0
+//	stamina_cost = 0
+//	stamina_crit_chance = 0
 	var/sound_armed = null
 	var/icon_state_armed = null
 	var/not_in_mousetraps = 0
@@ -45,7 +45,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade)
 			if (user?.bioHolder.HasEffect("clumsy"))
 				boutput(user, "<span class='alert'>Huh? How does this thing work?!</span>")
 				src.icon_state = src.icon_state_armed
-				playsound(src.loc, src.sound_armed, 75, 1, -3)
+				playsound(src.loc, src.sound_armed, 75, 1, SOUND_RANGE_STANDARD)
 				src.add_fingerprint(user)
 				SPAWN_DBG(0.5 SECONDS)
 					if (src) prime()
@@ -53,7 +53,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade)
 			else
 				boutput(user, "<span class='alert'>You prime [src]! [det_time/10] seconds!</span>")
 				src.armed_fx()
-				playsound(src.loc, src.sound_armed, 75, 1, -3)
+				playsound(src.loc, src.sound_armed, 75, 1, SOUND_RANGE_STANDARD)
 				src.add_fingerprint(user)
 				SPAWN_DBG(src.det_time)
 					if (src) prime()
@@ -72,7 +72,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade)
 				message_admins("Grenade ([src]) primed at [log_loc(src)] by [key_name(user)].")
 				logTheThing("combat", user, null, "primes a grenade ([src.type]) at [log_loc(user)].")
 				boutput(user, "<span class='alert'>You prime [src]! [det_time/10] seconds!</span>")
-				playsound(src.loc, src.sound_armed, 75, 1, -3)
+				playsound(src.loc, src.sound_armed, 75, 1, SOUND_RANGE_STANDARD)
 				SPAWN_DBG(src.det_time)
 					if (src) prime()
 					return
@@ -202,7 +202,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade)
 				boutput(user, "<span style=\"color:red\">Huh? How does this thing work?!</span>")
 				src.icon_state = src.icon_state_exploding
 				flick(src.icon_state_armed, src)
-				playsound(src.loc, src.sound_armed, 75, 1, -3)
+				playsound(src.loc, src.sound_armed, 75, 1, SOUND_RANGE_STANDARD)
 				src.add_fingerprint(user)
 				SPAWN_DBG(0.5 SECONDS)
 					if (src) prime()
@@ -211,7 +211,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade)
 				boutput(user, "<span style=\"color:red\">You prime [src]! [det_time/10] seconds!</span>")
 				src.icon_state = src.icon_state_exploding
 				flick(src.icon_state_armed, src)
-				playsound(src.loc, src.sound_armed, 75, 1, -3)
+				playsound(src.loc, src.sound_armed, 75, 1, SOUND_RANGE_STANDARD)
 				src.add_fingerprint(user)
 				SPAWN_DBG(src.det_time)
 					if (src) prime()
@@ -227,10 +227,6 @@ ABSTRACT_TYPE(/obj/item/old_grenade)
 				qdel(src)
 				return
 			for (var/atom/X in orange(9, T))
-				if (istype(X,/obj/machinery/containment_field))
-					continue
-				if (istype(X,/obj/machinery/field_generator))
-					continue
 				if (istype(X,/turf))
 					continue
 				if (istype(X, /obj))
@@ -268,7 +264,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade)
 				boutput(user, "<span style=\"color:red\">Huh? How does this thing work?!</span>")
 				src.icon_state = src.icon_state_exploding
 				flick(src.icon_state_armed, src)
-				playsound(src.loc, src.sound_armed, 75, 1, -3)
+				playsound(src.loc, src.sound_armed, 75, 1, SOUND_RANGE_STANDARD)
 				src.add_fingerprint(user)
 				SPAWN_DBG(0.5 SECONDS)
 					if (src) prime()
@@ -277,7 +273,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade)
 				boutput(user, "<span style=\"color:red\">You prime [src]! [det_time/10] seconds!</span>")
 				src.icon_state = src.icon_state_exploding
 				flick(src.icon_state_armed, src)
-				playsound(src.loc, src.sound_armed, 75, 1, -3)
+				playsound(src.loc, src.sound_armed, 75, 1, SOUND_RANGE_STANDARD)
 				src.add_fingerprint(user)
 				SPAWN_DBG(src.det_time)
 					if (src) prime()
@@ -331,7 +327,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade)
 	prime()
 		var/turf/T = ..()
 		if (T)
-			playsound(T, "sound/effects/smoke.ogg", 50, 1, -3)
+			playsound(T, "sound/effects/smoke.ogg", 50, 1, SOUND_RANGE_STANDARD)
 			SPAWN_DBG(0)
 				if (src)
 					src.smoke.start()
@@ -458,7 +454,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 	prime()
 		. = ..()
 		var/turf/T = .
-		playsound(T, "sound/effects/smoke.ogg", 20, 1, -2)
+		playsound(T, "sound/effects/smoke.ogg", 20, 1, SOUND_RANGE_STANDARD)
 		SPAWN_DBG(0)
 			if (src.smoke) //Wire note: Fix for Cannot execute null.start()
 				for(var/i = 1 to 6)
@@ -709,7 +705,8 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 	afterattack(atom/target as mob|obj|turf|area, mob/user as mob)
 		if (get_dist(user, target) <= 1 || (!isturf(target) && !isturf(target.loc)) || !isturf(user.loc))
 			return
-		if (istype(target, /obj/item/storage)) return ..()
+		if (target.storage)
+			return ..()
 		if (src.state == 0)
 			message_admins("Grenade ([src]) primed in [get_area(src)] [log_loc(src)] by [key_name(user)].")
 			logTheThing("combat", user, null, "primes a grenade ([src.type]) at [log_loc(user)].")
@@ -963,6 +960,9 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 		//iconstate = "fartbomb-dirty"
 
 		detonate()
+			if (!pooping_allowed)
+				//just act like a regular buttbomb
+				return ..()
 			var/theturf = get_turf(src)
 			var/list/spraybits = new/list()
 			var/direction = NORTH
@@ -979,7 +979,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 			SPAWN_DBG(0)
 				//Center tile
 				var/obj/effects/spray/S = spraybits[1]
-				make_cleanable(/obj/decal/cleanable/tracked_reagents/mud,S.loc)
+				new /obj/decal/cleanable/tracked_reagents/mud(S.loc)
 				if(is_blocked_turf(S.loc))
 					spraybits -= S
 					qdel(S)
@@ -988,9 +988,9 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 				for(var/i=0, i<src.splashzone, i++)
 					for(var/obj/effects/spray/SP in spraybits)
 						SP.set_loc(get_step(SP.loc, SP.original_dir))
-						make_cleanable(/obj/decal/cleanable/tracked_reagents/mud,SP.loc)
+						new /obj/decal/cleanable/tracked_reagents/mud(SP.loc)
 						if(is_blocked_turf(SP.loc))
-							make_cleanable(/obj/decal/cleanable/tracked_reagents/mud,SP.loc)
+							new /obj/decal/cleanable/tracked_reagents/mud(SP.loc)
 							spraybits -= SP
 							qdel(SP)
 
@@ -1078,8 +1078,8 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 	w_class = W_CLASS_TINY
 	var/det_time = 20
 	stamina_damage = 5
-	stamina_cost = 5
-	stamina_crit_chance = 5
+//	stamina_cost = 5
+//	stamina_crit_chance = 5
 	var/slashed = FALSE // has it been emptied out? if so, better dud!
 	var/primer_burnt = FALSE // avoid priming a firework multiple times, that doesn't make sense!
 	var/primed = FALSE // cutting open lit fireworks is a BAD idea
@@ -1174,7 +1174,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 			src.name = "empty [src.name]" // its empty now!
 			src.desc = "[src.desc] It has been cut open and emptied out."
 
-			make_cleanable(/obj/decal/cleanable/magnesiumpile, get_turf(src.loc)) // create magnesium pile
+			new /obj/decal/cleanable/magnesiumpile( get_turf(src.loc)) // create magnesium pile
 			src.reagents.clear_reagents() // remove magnesium from firework
 			return
 
@@ -1253,8 +1253,8 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 	var/expl_range = 1
 	desc = "A timed device that releases a relatively strong concussive force, strong enough to destroy rock and metal."
 	stamina_damage = 1
-	stamina_cost = 1
-	stamina_crit_chance = 0
+//	stamina_cost = 1
+//	stamina_crit_chance = 0
 
 	attack_hand(var/mob/user)
 		if (src.state)
@@ -1265,7 +1265,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 	afterattack(atom/target as mob|obj|turf|area, mob/user as mob)
 		if (user.equipped() == src)
 			if (!src.state)
-				if (istype(target, /obj/item/storage)) // no blowing yourself up if you have full backpack
+				if (!src.check_placeable_target(target)) // no blowing yourself up if you have full backpack
 					return
 				if (user.bioHolder && user.bioHolder.HasEffect("clumsy"))
 					boutput(user, "<span class='alert'>Huh? How does this thing work?!</span>")
@@ -1345,6 +1345,13 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 		qdel(src)
 		return
 
+	proc/check_placeable_target(atom/A)
+		if (!istype(A, /obj/item))
+			return TRUE
+		if (A.storage) // no blowing yourself up if you have full storage
+			return FALSE
+		return A.density
+
 /obj/item/breaching_charge/NT
 	name = "NanoTrasen Experimental EDF-7 Breaching Charge"
 	expl_devas = 0
@@ -1353,8 +1360,8 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 	expl_flash = 10
 	expl_range = 2
 	stamina_damage = 1
-	stamina_cost = 1
-	stamina_crit_chance = 0
+//	stamina_cost = 1
+//	stamina_crit_chance = 0
 
 /obj/item/breaching_charge/thermite
 	name = "Thermite Breaching Charge"
@@ -1362,35 +1369,6 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 	flags = ONBELT
 	w_class = W_CLASS_TINY
 	expl_range = 2
-
-	afterattack(atom/target as mob|obj|turf|area, mob/user as mob)
-		if (user.equipped() == src)
-			if (!src.state)
-				if (istype(target, /obj/item/storage)) // no blowing yourself up if you have full backpack
-					return
-				if (user.bioHolder && user.bioHolder.HasEffect("clumsy"))
-					boutput(user, "<span class='alert'>Huh? How does this thing work?!</span>")
-					logTheThing("combat", user, null, "accidentally triggers [src] (clumsy bioeffect) at [log_loc(user)].")
-					SPAWN_DBG(0.5 SECONDS)
-						user.u_equip(src)
-						src.boom()
-						return
-				else
-					boutput(user, "<span class='alert'>You slap the charge on [target], [det_time/10] seconds!</span>")
-					user.visible_message("<span class='alert'>[user] has attached [src] to [target].</span>")
-					src.icon_state = "bcharge2"
-					user.u_equip(src)
-					src.set_loc(get_turf(target))
-					src.anchored = ANCHORED
-					src.state = 1
-
-					// Yes, please (Convair880).
-					logTheThing("combat", user, null, "attaches a [src] to [target] at [log_loc(target)].")
-
-					SPAWN_DBG (src.det_time)
-						if (src)
-							src.boom()
-		return
 
 	boom()
 		if (!src || !istype(src))
@@ -1726,9 +1704,9 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 			//do mod effects : pre-explosion
 			if (glowsticks)
 				var/turf/T = get_turf(src.loc)
-				make_cleanable( /obj/decal/cleanable/generic,T)
+				new  /obj/decal/cleanable/generic(T)
 				for (var/turf/splat in view(1,src.loc))
-					make_cleanable( /obj/decal/cleanable/greenglow,splat)
+					new  /obj/decal/cleanable/greenglow(splat)
 				var/radium_amt = 6 * glowsticks
 				for (var/mob/M in view(3,src.loc))
 					if(iscarbon(M))
@@ -1753,7 +1731,7 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 				if (meat > 1)
 					gibs(src.loc)
 				for (var/turf/splat in view(meat,src.loc))
-					make_cleanable( /obj/decal/cleanable/tracked_reagents/blood,splat)
+					new  /obj/decal/cleanable/tracked_reagents/blood(splat)
 			if (ghost) //throw objects towards bomb center
 				var/turf/T = get_turf(src.loc)
 				if (ghost > 1)
@@ -1880,8 +1858,8 @@ ABSTRACT_TYPE(/obj/item/old_grenade/projectile)
 
 	on_blowthefuckup(strength) //always blow hole!
 		..(strength)
-		if (istype(src.loc,/turf/space/fluid))
-			var/turf/space/fluid/T = src.loc
+		if (istype(src.loc,/turf/space/fluid/ocean))
+			var/turf/space/fluid/ocean/T = src.loc
 			T.blow_hole()
 
 /obj/effects/explosion/tiny_baby

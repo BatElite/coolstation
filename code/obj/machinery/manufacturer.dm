@@ -1020,7 +1020,7 @@
 				src.scan = null
 		return 0
 
-	MouseDrop(over_object, src_location, over_location)
+	mouse_drop(over_object, src_location, over_location)
 		if(!isliving(usr))
 			boutput(usr, "<span class='alert'>Only living mobs are able to set the manufacturer's output target.</span>")
 			return
@@ -1057,6 +1057,9 @@
 		else if (istype(over_object,/turf/floor/))
 			src.output_target = over_object
 			boutput(usr, "<span class='notice'>You set the manufacturer to output to [over_object]!</span>")
+
+		else if(over_object == usr && HAS_ATOM_PROPERTY(usr, PROP_LIFT_ANYTHING))
+			return ..()
 
 		else
 			boutput(usr, "<span class='alert'>You can't use that as an output target.</span>")
@@ -1404,7 +1407,7 @@
 				src.timeleft *= 1.5
 			src.timeleft /= src.speed
 			///
-		playsound(src.loc, src.sound_beginwork, 50, 1, 0, 3)
+		playsound(src.loc, src.sound_beginwork, 50, 1, SOUND_RANGE_STANDARD, 3)
 		src.mode = "working"
 		src.build_icon()
 
@@ -1571,8 +1574,16 @@
 	</thead>
 	<tbody>
 		"}
+//Custom materials from the nano forge aren't in the materails list. so there's heres a hacky temp fix.
 		for(var/mat_id in src.resource_amounts)
+			if(src.resource_amounts[mat_id] <= 0)
+				continue //if we have none of this material, skip it
 			var/datum/material/mat = getMaterial(mat_id)
+			if(!mat)//the hacky fix part starts
+				for(var/obj/item/I in src.contents)
+					if(I.material && I.material.mat_id == mat_id)
+						mat = I.material.name
+						break//hacky fix part ends
 			dat += {"
 		<tr>
 			<td style = 'text-transform: capitalize;'><a href='byond://?src=\ref[src];eject=[mat_id]' class='buttonlink'>&#9167;</a> [mat]</td>
@@ -1911,6 +1922,11 @@
 	blueprint = /datum/manufacture/mechanics/ai_status_display
 
 
+/******************** Communications Dish Blueprints *******************/
+
+/obj/item/paper/manufacturer_blueprint/communications_dish
+	blueprint = /datum/manufacture/mechanics/communications_dish
+
 /******************** Alastor Pattern Thruster Blueprints *******************/
 /obj/item/paper/manufacturer_blueprint/thrusters
 	icon = 'icons/obj/items/writing.dmi'
@@ -2246,10 +2262,12 @@
 #endif
 	)
 
+/*
 	hidden = list(/datum/manufacture/RCD,
 	/datum/manufacture/RCDammo,
 	/datum/manufacture/RCDammomedium,
 	/datum/manufacture/RCDammolarge)
+*/
 
 /obj/machinery/manufacturer/hangar
 	name = "Ship Component Fabricator"
@@ -2472,12 +2490,13 @@
 	free_resource_amt = 5
 	free_resources = list(/obj/item/material_piece/steel)
 	accept_blueprints = 0
-	available = list(/datum/manufacture/crate,	//hey if you update these please remember to add it to /hop_and_uniform's list too
+	available = list(/datum/manufacture/crate,
 	/datum/manufacture/packingcrate,
 	/datum/manufacture/pizzabox,
 	/datum/manufacture/wooden,
 	/datum/manufacture/medical,
-	/datum/manufacture/biohazard)
+	/datum/manufacture/biohazard,
+	/datum/manufacture/bluebin)
 
 	hidden = list(/datum/manufacture/classcrate)
 
@@ -2525,11 +2544,14 @@
 	/datum/manufacture/atmos_module/vent_pump,
 	/datum/manufacture/atmos_module/vent_scrubber,
 	/datum/manufacture/atmos_module/volume_pump,
+	/datum/manufacture/atmos_module/meter)
+/*	,
 	/datum/manufacture/RCDammo,
 	/datum/manufacture/RCDammomedium)
 
 	hidden = list(/datum/manufacture/RCDammolarge,
 	/datum/manufacture/RCD)
+*/
 
 /obj/machinery/manufacturer/zombie_survival
 	name = "Uber-Extreme Survival Manufacturer"

@@ -165,7 +165,7 @@
 	has_processing_loop = 1
 
 	process()
-		playsound(src.loc, 'sound/voice/chanting.ogg', 100, 0, 5, 0.5)
+		playsound(src.loc, 'sound/voice/chanting.ogg', 100, 0, SOUND_RANGE_STANDARD, 0.5)
 
 /obj/do_not_press_this_button
 	name = "do not press this button"
@@ -264,7 +264,7 @@
 
 			for_by_tcl(G, /obj/critter/dog/george)
 				G.visible_message("<span class='alert'><b>[G]</b> pees on the floor. Bad dog!</span>")
-				make_cleanable( /obj/decal/cleanable/urine ,get_turf(G))
+				new  /obj/decal/cleanable/urine (get_turf(G))
 		return
 
 	attackby(obj/item/W as obj, mob/user as mob)

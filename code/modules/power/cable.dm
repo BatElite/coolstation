@@ -12,6 +12,9 @@
 
 	elecflash(src)
 
+	if(!user)		//dont shock nobody ):
+		return 0
+
 	return user.shock(src, PN ? PN.avail : 0, user.hand == 1 ? "l_arm": "r_arm", 1, ignore_gloves ? 1 : 0)
 
 // attach a wire to a power machine - leads from the turf you are standing on
@@ -143,7 +146,8 @@
 
 	var/turf/T = src.loc			// hide if turf is not intact
 									// but show if in space
-	if(level==1) hide(T.intact)
+	if(istype(T, /turf/space)) hide(0)
+	else if(level==1) hide(T.intact)
 
 	//cableimg = image(src.icon, src.loc, src.icon_state)
 	//cableimg.layer = OBJ_LAYER

@@ -49,13 +49,13 @@
 						src.changeStatus("weakened", 3.5 SECONDS)
 						src.lastgasp()
 						boutput(src, "<span class='notice'>You slipped on the floor!</span>")
-						playsound(T, "sound/misc/slip.ogg", 50, 1, -3)
+						playsound(T, "sound/misc/slip.ogg", 50, 1, SOUND_RANGE_STANDARD)
 						var/atom/target = get_edge_target_turf(src, src.dir)
 						src.throw_at(target, 12, 1, throw_type = THROW_SLIP)
 					if (3) // superlube
 						src.pulling = null
 						src.changeStatus("weakened", 6 SECONDS)
-						playsound(T, "sound/misc/slip.ogg", 50, 1, -3)
+						playsound(T, "sound/misc/slip.ogg", 50, 1, SOUND_RANGE_STANDARD)
 						src.lastgasp()
 						boutput(src, "<span class='notice'>You slipped on the floor!</span>")
 						var/atom/target = get_edge_target_turf(src, src.dir)
@@ -108,9 +108,9 @@
 		if(!istype(H)) // just in case something unhuman poops, lets still make a turd.
 			var/turf/T = get_turf(src)
 			if (istype(T))
-				make_cleanable( /obj/decal/cleanable/tracked_reagents/mud,T)
+				new  /obj/decal/cleanable/tracked_reagents/mud(T)
 			return
-		playsound(H, "sound/voice/hoooagh2.ogg", 50, 0, 0, H.get_age_pitch(), channel=VOLUME_CHANNEL_EMOTE)
+		playsound(H, "sound/voice/hoooagh2.ogg", 50, 0, SOUND_RANGE_STANDARD, H.get_age_pitch(), channel=VOLUME_CHANNEL_EMOTE)
 		if(H.wear_suit || H.w_uniform) // wearing pants while shitting? fine!!
 			if(H.bioHolder.HasEffect("teflon_colon") || H.traitHolder.hasTrait("teflon_colon"))
 				if(prob(10))
@@ -130,13 +130,13 @@
 			else
 				H.wear_suit?.add_mud(H, H.poop_amount ? H.poop_amount : 15)
 			H.set_clothing_icon_dirty() //ur a shitter
-			playsound(H, H.sound_fart, 50, 0, 0, H.get_age_pitch(), channel=VOLUME_CHANNEL_EMOTE)
+			playsound(H, H.sound_fart, 50, 0, SOUND_RANGE_STANDARD, H.get_age_pitch(), channel=VOLUME_CHANNEL_EMOTE)
 			return
 
 		else
 			if(istype(poo_target) && poo_target.reagents && poo_target.reagents.total_volume < poo_target.reagents.maximum_volume && poo_target.is_open_container())
 				H.visible_message("<span class='alert'><B>[H] tries to shit in [poo_target]!</B></span>")
-				playsound(H, H.sound_fart, 50, 0, 0, H.get_age_pitch(), channel=VOLUME_CHANNEL_EMOTE)
+				playsound(H, H.sound_fart, 50, 0, SOUND_RANGE_STANDARD, H.get_age_pitch(), channel=VOLUME_CHANNEL_EMOTE)
 				if(prob(H.bioHolder.HasEffect("clumsy")?75:25))//clowns are bad at shitting in containers
 					H.visible_message("<span class='alert'><B>[H] misses the container!</B></span>")
 					shit.throw_impact(H)
@@ -192,7 +192,7 @@
 		// possibly change the text colour to the gray emote text
 		src.visible_message(pick("<B>[src]</B> unzips their pants and pees on the floor.", "<B>[src]</B> pisses all over the floor!", "<B>[src]</B> makes a big piss puddle on the floor."))
 		src.cleanhands = 0
-		var/obj/decal/cleanable/urine/U = make_cleanable(/obj/decal/cleanable/urine, src.loc)
+		var/obj/decal/cleanable/urine/U = new /obj/decal/cleanable/urine( src.loc)
 		U.sample_amt = min(src.urine, 80)
 		src.urine = 0
 
@@ -234,7 +234,6 @@
 		..(allow_dead, grunt=customGrunt)
 
 /mob/living/carbon/full_heal()
-	src.remove_ailments()
 	src.take_toxin_damage(-INFINITY)
 	src.take_oxygen_deprivation(-INFINITY)
 	src.change_misstep_chance(-INFINITY)

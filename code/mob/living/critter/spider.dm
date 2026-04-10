@@ -100,6 +100,11 @@
 			src.reagents.add_reagent(venom2, 50, null)
 		return ..()
 
+	ai_rate_target(mob/M)
+		if(istype(M, /mob/living/critter/spider))
+			return 0
+		return ..()
+
 	proc/venom_bite(mob/M)
 		if (src.reagents && istype(M) && M.reagents)
 			playsound(src, src.bitesound, 50, 1)
@@ -111,7 +116,6 @@
 			// now spiders won't poison themselves - cirr
 			M.reagents.add_reagent(src.venom1, bite_transfer_amt)
 			M.reagents.add_reagent(src.venom2, bite_transfer_amt)
-
 
 	proc/grow_up()
 		if (!src.babyspider || !ispath(src.adultpath))
@@ -434,7 +438,7 @@
 	var/list/bloods = list()
 
 	for (var/i in cardinal)
-		blood = make_cleanable(/obj/decal/cleanable/tracked_reagents/blood/splatter/extra, location)
+		blood = new /obj/decal/cleanable/tracked_reagents/blood/splatter/extra( location)
 		blood.blood_DNA = bDNA
 		blood.blood_type = btype
 		blood.color = random_saturated_hex_color()
@@ -443,7 +447,7 @@
 
 	var/extra = rand(2,4)
 	for (var/i = 1, i <= extra, i++)
-		blood = make_cleanable(/obj/decal/cleanable/tracked_reagents/blood/splatter/extra, location)
+		blood = new /obj/decal/cleanable/tracked_reagents/blood/splatter/extra( location)
 		blood.blood_DNA = bDNA
 		blood.blood_type = btype
 		blood.color = random_saturated_hex_color()

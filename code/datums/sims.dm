@@ -331,7 +331,7 @@
 					var/obj/item/clothing/U = H.wear_suit
 					U.add_stain("piss-soaked")
 					//U.name = "piss-soaked [initial(U.name)]"
-			make_cleanable(/obj/decal/cleanable/urine,holder.owner.loc)
+			new /obj/decal/cleanable/urine(holder.owner.loc)
 
 	comfort
 		name = "comfort"
@@ -527,7 +527,7 @@
 #endif
 
 	Topic(href, href_list)
-		usr_admin_only
+		USR_ADMIN_ONLY
 		if (href_list["mot"])
 			var/datum/simsMotive/M = locate(href_list["mot"])
 			if (!istype(M) || M != motives[M.type])

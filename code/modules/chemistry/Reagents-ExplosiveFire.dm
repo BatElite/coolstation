@@ -350,7 +350,7 @@ datum
 							continue
 
 						if (src.no_fluff == 0)
-							if (!M.ears_protected_from_sound())
+							if (!cant_hear(M))
 								boutput(M, "<span class='alert'><b>[hootmode ? "HOOT" : "BANG"]</b></span>")
 							else
 								continue
@@ -366,7 +366,7 @@ datum
 
 					for (var/mob/living/silicon/S in all_hearers(world.view, location))
 						if (src.no_fluff == 0)
-							if (!S.ears_protected_from_sound())
+							if (!cant_hear(S))
 								boutput(S, "<span class='alert'><b>[hootmode ? "HOOT" : "BANG"]</b></span>")
 							else
 								continue
@@ -847,7 +847,7 @@ datum
 				if(!istype(T, /turf/space))
 					//if(volume >= 5)
 					if(!locate(/obj/decal/cleanable/dirt) in T)
-						var/obj/decal/cleanable/dirt/D = make_cleanable(/obj/decal/cleanable/dirt,T)
+						var/obj/decal/cleanable/dirt/D = new /obj/decal/cleanable/dirt(T)
 						D.name = "black powder"
 						D.desc = "Uh oh. Someone better clean this up!"
 						if(!D.reagents) D.create_reagents(10)
@@ -915,7 +915,7 @@ datum
 
 			reaction_turf(var/turf/T, var/volume)
 				if(!istype(T, /turf/space) && volume >= 5 && !locate(/obj/decal/cleanable/nitrotriiodide) in T)
-					return make_cleanable(/obj/decal/cleanable/nitrotriiodide,T)
+					return new /obj/decal/cleanable/nitrotriiodide(T)
 
 			reaction_temperature(exposed_temperature, exposed_volume)
 				dry()

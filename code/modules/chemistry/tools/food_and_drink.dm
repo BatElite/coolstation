@@ -406,7 +406,7 @@
 						src.set_loc(null)
 						if(ishuman(M))
 							var/mob/living/carbon/human/H = M
-							H.force_equip(I,item_slot) // mobs don't have force_equip
+							H.force_equip(I,item_slot, TRUE) // mobs don't have force_equip
 							return
 			drop.set_loc(get_turf(src.loc))
 
@@ -488,6 +488,7 @@
 	icon_state = null
 	flags = FPRINT | TABLEPASS | OPENCONTAINER | SUPPRESSATTACK
 	rc_flags = RC_FULLNESS | RC_VISIBLE | RC_SPECTRO
+	object_flags = POUR_INTO
 	var/gulp_size = 5 //This is now officially broken ... need to think of a nice way to fix it.
 	var/splash_all_contents = 0 //making an executive decision to *not* splash everything out by default just because you clicked your beer on something else by accident
 	doants = 0
@@ -518,13 +519,13 @@
 
 	on_spin_emote(var/mob/living/carbon/human/user as mob)
 		. = ..()
-		if (src.reagents && src.reagents.total_volume > 0)
+		if (src.is_open_container() &&src.reagents && src.reagents.total_volume > 0)
 			user.visible_message("<span class='alert'><b>[user] spills the contents of [src] all over [him_or_her(user)]self!</b></span>")
 			logTheThing("combat", user, null, "spills the contents of [src] [log_reagents(src)] all over [him_or_her(user)]self at [log_loc(user)].")
 			src.reagents.reaction(get_turf(user), TOUCH)
 			src.reagents.clear_reagents()
 
-	MouseDrop(atom/over_object)
+	mouse_drop(atom/over_object)
 		..()
 		if(!(usr == over_object)) return
 		if(!istype(usr, /mob/living/carbon)) return
@@ -954,7 +955,7 @@
 			return 1
 		else return ..()
 
-	proc/update_icon()
+	update_icon()
 		src.underlays = null
 		if (src.broken)
 			src.reagents.clear_reagents()
@@ -1057,8 +1058,8 @@
 			throw_range = 5
 			w_class = W_CLASS_SMALL
 			stamina_damage = 15
-			stamina_cost = 15
-			stamina_crit_chance = 50
+//			stamina_cost = 15
+//			stamina_crit_chance = 50
 			tooltip_rebuild = 1
 
 			if (src.weakness >= rand(2,12))
@@ -1068,7 +1069,7 @@
 				var/obj/item/raw_material/shard/glass/G = new()
 				G.set_loc(U)
 				qdel(src)
-				if (prob (25))
+				if (prob (25) && (!user.traitHolder && !user.traitHolder.hasTrait("hardcore")))
 					user.visible_message("<span class='alert'>The broken shards of [src] slice up [user]'s hand!</span>")
 					playsound(U, "sound/impact_sounds/Slimy_Splat_1.ogg", 50, 1)
 					var/damage = rand(5,15)
@@ -1134,7 +1135,7 @@
 			src.reagents.reaction(U)
 
 		DEBUG_MESSAGE("[src].smash_on_thing([user], [target]): success_prob [success_prob], hurt_prob [hurt_prob]")
-		if (!src.broken && prob(success_prob))
+		if (!src.broken && (prob(success_prob) || (user.traitHolder && user.traitHolder.hasTrait("hardcore"))))
 			user.visible_message("<span class='alert'><b>[user] smashes [src] on [target], shattering it open![prob(50) ? " [user] looks like they're ready for a fight!" : " [src] has one mean edge on it!"]</span>")
 			src.item_state = "broken_beer" // shattered beer inhand sprite
 			user.update_inhands()
@@ -1199,7 +1200,7 @@
 	on_reagent_change()
 		src.update_icon()
 
-	proc/update_icon()
+	update_icon()
 		src.underlays = null
 		if (reagents.total_volume)
 			var/fluid_state = round(clamp((src.reagents.total_volume / src.reagents.maximum_volume * 3 + 1), 1, 3))
@@ -1501,6 +1502,12 @@
 	proc/checkContinue()
 		if (glass.reagents.total_volume <= 0 || !isalive(glassholder) || !glassholder.find_in_hand(glass))
 			return FALSE
+		if(target && isliving(target))
+			var/mob/living/L = target
+			if(L.organHolder && L.organHolder.stomach && (L.organHolder.stomach.reagents?.maximum_volume - L.organHolder.stomach.reagents?.total_volume <= 0))
+				target.visible_message("[target.name] [pick("fucken HURLS.","barfs it back up!","vomits bigtime!","pukes.")]")
+				target.vomit()
+				return FALSE
 		if ((target.reagents?.maximum_volume-target.reagents?.total_volume) <= 0) // we're fuckin full, slosh slosh,
 			target.visible_message("[target.name] [pick("fucken HURLS.","barfs it back up!","vomits bigtime!","pukes.")]")
 			target.vomit()
@@ -1512,7 +1519,11 @@
 		glassholder = src.owner
 		loopStart()
 		if(glassholder == target)
-			glassholder.visible_message("[glassholder.name] starts chugging the [glass.name]!")
+			if (glassholder.traitHolder && glassholder.traitHolder.hasTrait("hardcore"))
+				duration = 0.2 SECONDS
+				glassholder.visible_message("[glassholder.name] starts chugging the [glass.name] like it's NOTHING!")
+			else
+				glassholder.visible_message("[glassholder.name] starts chugging the [glass.name]!")
 		else
 			glassholder.visible_message("[glassholder.name] starts forcing [target.name] to chug the [glass.name]!")
 		logTheThing("combat", glassholder, target, "[glassholder == target ? "starts chugging from" : "makes [constructTarget(target,"combat")] chug from"] [glass] [log_reagents(glass)] at [log_loc(target)].")
@@ -1535,14 +1546,23 @@
 	onEnd()
 
 		if (glass.reagents.total_volume) //Take a sip
+			if(target && isliving(target))
+				var/mob/living/L = target
+				if(L.organHolder && L.organHolder.stomach) //drinking with no stomach just pours it into your blood
+					glass.reagents.trans_to(L.organHolder.stomach, min(glass.reagents.total_volume, glass.gulp_size))
+				else
+					glass.reagents.trans_to(L, min(glass.reagents.total_volume, glass.gulp_size))
+			else
+				glass.reagents.trans_to(target, min(glass.reagents.total_volume, glass.gulp_size))
 			glass.reagents.reaction(target, INGEST, min(glass.reagents.total_volume, glass.gulp_size, (target.reagents?.maximum_volume-target.reagents?.total_volume)))
-			glass.reagents.trans_to(target, min(glass.reagents.total_volume, glass.gulp_size))
-			playsound(target.loc,"sound/items/drink.ogg", rand(10,50), 1)
+			playsound(target.loc,"sound/items/drink.ogg", rand(10,50), 1, SOUND_RANGE_MODERATE)
 			eat_twitch(target)
 
 		if(glass.reagents.total_volume <= 0)
 			..()
-			target.visible_message("[target.name] chugged everything in the [glass.name]!")
+			if (glassholder.traitHolder && glassholder.traitHolder.hasTrait("hardcore"))
+				target.visible_message("[target.name] chugged everything in the [glass.name]!")
+
 		else if(!checkContinue())
 			..()
 			target.visible_message("[target.name] stops chugging.")
@@ -1825,7 +1845,7 @@
 	on_reagent_change()
 		src.update_icon()
 
-	proc/update_icon()
+	update_icon()
 		if (src.reagents.total_volume == 0)
 			icon_state = "duo"
 		if (src.reagents.total_volume > 0)
@@ -1912,7 +1932,7 @@
 	on_reagent_change()
 		src.update_icon()
 
-	proc/update_icon() //updates icon based on fluids inside
+	update_icon() //updates icon based on fluids inside
 		icon_state = "[glass_style]"
 
 		var/datum/color/average = reagents.get_average_color()
@@ -1935,7 +1955,7 @@
 	on_reagent_change()
 		src.update_icon()
 
-	proc/update_icon() //updates icon based on fluids inside
+	update_icon() //updates icon based on fluids inside
 		if (src.reagents && src.reagents.total_volume)
 			var/datum/color/average = reagents.get_average_color()
 			var/average_rgb = average.to_rgba()
@@ -2074,7 +2094,7 @@
 	attack_self(mob/user)
 		if (src.reagents.total_volume > 0)
 			user.visible_message("<b>[user.name]</b> shakes the container [pick("rapidly", "thoroughly", "carefully")].")
-			playsound(src, "sound/items/CocktailShake.ogg", 25, 1, -6)
+			playsound(src, "sound/items/CocktailShake.ogg", 25, 1, SOUND_RANGE_MODERATE)
 			sleep (0.3 SECONDS)
 			src.reagents.inert = 0
 			src.reagents.physical_shock(rand(5, 20))

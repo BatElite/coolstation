@@ -15,8 +15,6 @@
 		var/timetoreach = rand(30,60)
 		var/actualtime = timetoreach * 10 + timetoreachsec
 
-		for (var/mob/M in mobs)
-			M.flash(3 SECONDS)
 		var/sound/siren = sound('sound/misc/airraid_loop_short.ogg')
 		siren.repeat = TRUE
 		siren.channel = 5
@@ -25,7 +23,7 @@
 		command_alert("Extreme levels of radiation detected approaching the [station_or_ship()]. All personnel have [timetoreach].[timetoreachsec] seconds to enter a maintenance tunnel or radiation safezone. Maintenance doors have temporarily had their access requirements removed. This is not a test.", "Anomaly Alert")
 
 		var/datum/directed_broadcast/emergency/broadcast = new(station_name, "Radiation Storm", "[timetoreach] Seconds", "Seek shelter in maintenance corridors immediately. Interlocks have been released.")
-		broadcast_controls.broadcast_start(broadcast, TRUE, -1, 1)
+		broadcast_controls.broadcast_start(broadcast, TRUE, set_loops = -1, process_immediately = TRUE)
 
 		SPAWN_DBG(0)
 			for_by_tcl(A, /obj/machinery/door/airlock)
@@ -48,7 +46,7 @@
 				else
 					if (!A.irradiated)
 						A.irradiated = TRUE
-						A.icon_state = "blowout"
+						A.icon_state = "bluemild"
 					for (var/turf/T in A.turfs)
 						if (rand(0,1000) < 5 && istype(T,/turf/floor))
 							Artifact_Spawn(T)
@@ -107,9 +105,6 @@
 				LAGCHECK(LAG_LOW)
 				S.color = null
 	#endif
-			for (var/mob/N in mobs)
-				N.flash(3 SECONDS)
-
 			sleep(rand(25 SECONDS,50 SECONDS))
 
 			for_by_tcl(A, /obj/machinery/door/airlock)

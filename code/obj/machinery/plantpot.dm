@@ -90,7 +90,7 @@
 	anchored = ANCHORED
 	mats = 0
 	deconstruct_flags = 0
-	icon_state = null
+	icon_state = "blank"
 	power_usage = 0
 	growth_rate = 1
 	/// plant to grow
@@ -101,7 +101,7 @@
 	var/list/datum/plant_gene_strain/spawn_commuts = list()
 	var/auto_water = TRUE
 
-	New()
+	New(newLoc, obj/item/seed/initial_seed)
 		SPAWN_DBG(0) // delay for prefab attribute assignment
 			var/datum/plant/P
 			//Adjust processing tier to slow down server burden unless necessary
@@ -112,8 +112,11 @@
 			..()
 			status |= BROKEN
 
-			if(P)
-				var/obj/item/seed/S = new()
+			if(initial_seed)
+				src.HYPnewplant(initial_seed)
+				update_icon()
+			else if(P)
+				var/obj/item/seed/S = new /obj/item/seed
 
 				S.generic_seed_setup(P)
 				src.HYPnewplant(S)
@@ -177,7 +180,7 @@
 	process()
 		..()
 		if(auto_water)
-			if(!src.reagents.has_reagent("water", 50))
+			if(src.reagents && !src.reagents.has_reagent("water", 50))
 				src.reagents.add_reagent("water", 200)
 
 	flower
@@ -214,7 +217,8 @@
 	density = 1
 	mats = 2
 	deconstruct_flags = DECON_SCREWDRIVER | DECON_WRENCH | DECON_CROWBAR
-	flags = NOSPLASH
+	flags = FPRINT | NOSPLASH | FLUID_SUBMERGE
+	object_flags = POUR_INTO
 	processing_tier = PROCESSING_SIXTEENTH
 	machine_registry_idx = MACHINES_PLANTPOTS
 	power_usage = 25
@@ -530,7 +534,7 @@
 								qdel(C)
 							else
 								qdel(C)
-							playsound(src.loc, "sound/items/eatfood.ogg", 30, 1, -2)
+							playsound(src.loc, "sound/items/eatfood.ogg", 30, 1, SOUND_RANGE_STANDARD)
 							src.reagents.add_reagent("blood", 120)
 							SPAWN_DBG(2.5 SECONDS)
 								if(src)
@@ -813,7 +817,7 @@
 			boutput(user, "The solution seems to contain [reag_list].")
 		return
 
-	MouseDrop(over_object, src_location, over_location)
+	mouse_drop(over_object, src_location, over_location)
 		..()
 		if(!isliving(usr)) return // ghosts killing plants fix
 		if(get_dist(src, usr) > 1)
@@ -921,7 +925,7 @@
 		UpdateOverlays(src.water_sprite, "water_fluid")
 		UpdateOverlays(src.water_meter, "water_meter")
 
-	proc/update_icon() //plant icon stuffs
+	update_icon() //plant icon stuffs
 		src.water_meter = image('icons/obj/hydroponics/machines_hydroponics.dmi',"ind-wat-[src.water_level]")
 		UpdateOverlays(water_meter, "water_meter")
 		if(!src.current)
@@ -1453,7 +1457,7 @@
 			HYPkillplant()
 
 		//do we have to run the next life tick manually? maybe
-		playsound(src.loc, "rustle", 50, 1, -5, 2)
+		playsound(src.loc, "rustle", 50, 1, SOUND_RANGE_MODERATE, 2)
 		update_icon()
 		update_name()
 
@@ -2050,7 +2054,7 @@ proc/HYPmutationcheck_sub(var/lowerbound,var/upperbound,var/checkedvariable)
 			poor_sod.TakeDamage("head", brute = 14)
 
 	///Let people orient rakes
-	MouseDrop(over_object, src_location, over_location)
+	mouse_drop(over_object, src_location, over_location)
 		var/to_face = get_dir(over_location, get_turf(src)) //Arguments reversed because the rake head faces back
 		if (to_face in cardinal) //rakes can't go diagonal
 			src.set_dir(to_face)

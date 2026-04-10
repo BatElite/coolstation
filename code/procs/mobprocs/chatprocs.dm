@@ -587,7 +587,7 @@ param: Uhhh I think this is related to targeted emotes? I'm not sure
 	var/message = null
 
 	if (istype(actual_emote))
-		if (!emote_check(voluntary, actual_emote.return_cooldown(src, voluntary), 1, !(actual_emote.possible_while_dead)))
+		if (!emote_check(voluntary, actual_emote.return_cooldown(src, voluntary), 1, actual_emote.possible_while))
 			return
 		what_have_we_done= actual_emote.enact(src, voluntary, param)
 	if (islist(what_have_we_done))
@@ -627,10 +627,9 @@ param: Uhhh I think this is related to targeted emotes? I'm not sure
 		for (var/mob/O in A.contents)
 			O.show_message("<span class='emote'>[message]</span>", m_type, group = (actual_emote.group ? actual_emote.group : "[src]_[act]_[custom]"), assoc_maptext = chat_text)
 
-/mob/proc/emote_check(var/voluntary = 1, var/time = 10, var/admin_bypass = 1, var/dead_check = 1)
+/mob/proc/emote_check(var/voluntary = 1, var/time = 10, var/admin_bypass = 1, var/possible_while = STAT_ALIVE)
 	if (src.emote_allowed)
-		if (dead_check && isdead(src))
-			src.emote_allowed = 0
+		if (src.stat > possible_while)
 			return 0
 		if (world.time >= (src.last_emote_time + src.last_emote_wait))
 			if (!no_emote_cooldowns && !(src.client && (src.client.holder && admin_bypass) && !src.client.player_mode) && voluntary)
@@ -952,12 +951,13 @@ param: Uhhh I think this is related to targeted emotes? I'm not sure
 	usr.client.preferences.flying_chat_hidden = !usr.client.preferences.flying_chat_hidden
 	boutput(usr, "<span class='notice'>[usr.client.preferences.flying_chat_hidden ? "No longer": "Now"] seeing flying chat.</span>")
 
-/mob/proc/show_message(msg, type, alt, alt_type, group = "", var/just_maptext, var/image/chat_maptext/assoc_maptext = null)
+/mob/proc/show_message(msg, type, alt, alt_type, group = "", var/just_maptext, var/image/chat_maptext/assoc_maptext = null, var/image/chat_maptext/assoc_deaf_maptext = null)
 	if (!src.client)
 		return
 
 	// We have procs to check for this stuff, you know. Ripped out a bunch of duplicate code, which also fixed earmuffs (Convair880).
 	var/check_failed = FALSE
+	var/deafened = FALSE
 	if (type)
 		if ((type & 1) && !src.sight_check(1))
 			check_failed = TRUE
@@ -966,15 +966,18 @@ param: Uhhh I think this is related to targeted emotes? I'm not sure
 			else
 				msg = alt
 				type = alt_type
-		if ((type & 2) && !src.hearing_check(1))
+				alt = null
+		if ((type & 2) && cant_hear(src))
+			if(check_failed || !alt)
+				return
+			msg = alt
 			check_failed = TRUE
-			if (!alt)
-				return
-			else
-				msg = alt
-				type = alt_type
-			if ((type & 1) && !src.sight_check(1))
-				return
+			deafened = TRUE
+			//else
+			//	msg = alt
+			//	type = alt_type
+			//if ((type & 1) && !src.sight_check(1))
+			//	return
 
 	if (!just_maptext && (isunconscious(src) || src.sleeping || src.getStatusDuration("paralysis")))
 		if (prob(20))
@@ -1001,6 +1004,16 @@ param: Uhhh I think this is related to targeted emotes? I'm not sure
 					if(assoc_maptext && observer.client && !observer.client.preferences.flying_chat_hidden)
 						assoc_maptext.show_to(observer.client)
 
+		else if(deafened)
+			if(assoc_deaf_maptext && src.client && !src.client.preferences?.flying_chat_hidden)
+				assoc_deaf_maptext.show_to(src.client)
+
+			if (isliving(src))
+				for (var/mob/dead/target_observer/observer in src:observers)
+					if(!just_maptext)
+						boutput(observer, msg, group)
+					if(assoc_deaf_maptext && observer.client && !observer.client.preferences.flying_chat_hidden)
+						assoc_deaf_maptext.show_to(observer.client)
 // Show a message to all mobs in sight of this one
 // This would be for visible actions by the src mob
 // message is the message output to anyone who can see e.g. "[src] does something!"

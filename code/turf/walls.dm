@@ -36,10 +36,10 @@
 	ReplaceWithFloor()
 		. = ..()
 		if (map_currently_underwater)
-			var/turf/space/fluid/n = get_step(src,NORTH)
-			var/turf/space/fluid/s = get_step(src,SOUTH)
-			var/turf/space/fluid/e = get_step(src,EAST)
-			var/turf/space/fluid/w = get_step(src,WEST)
+			var/turf/space/fluid/ocean/n = get_step(src,NORTH)
+			var/turf/space/fluid/ocean/s = get_step(src,SOUTH)
+			var/turf/space/fluid/ocean/e = get_step(src,EAST)
+			var/turf/space/fluid/ocean/w = get_step(src,WEST)
 			if(istype(n))
 				n.tilenotify(src)
 			if(istype(s))
@@ -85,7 +85,7 @@
 /turf/wall/New()
 	..()
 	if(!ticker && istype(src.loc, /area/station/maintenance) && prob(7))
-		make_cleanable( /obj/decal/cleanable/fungus,src)
+		new  /obj/decal/cleanable/fungus(src)
 
 // Made this a proc to avoid duplicate code (Convair880).
 /turf/wall/proc/attach_light_fixture_parts(var/mob/user, var/obj/item/W, var/instantly)

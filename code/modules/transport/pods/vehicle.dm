@@ -154,14 +154,14 @@
 		..()
 
 		attack_particle(user,src)
-		playsound(src.loc, W.hitsound, 50, 1, -1)
+		playsound(src.loc, W.hitsound, 50, 1, SOUND_RANGE_STANDARD)
 		hit_twitch(src)
 
 		switch(W.hit_type)
 			if (DAMAGE_BURN)
 				src.material?.triggerTemp(src, W.force * 1000)
 				if (prob(W.force*2))
-					playsound(src.loc, 'sound/impact_sounds/Metal_Clang_1.ogg', 50, 1, -1)
+					playsound(src.loc, 'sound/impact_sounds/Metal_Clang_1.ogg', 50, 1, SOUND_RANGE_STANDARD)
 					for (var/mob/M in src)
 						M.changeStatus("weakened",1 SECONDS)
 						M.show_text("The physical shock of the blow knocks you around!", "red")
@@ -169,7 +169,7 @@
 			else
 				src.health -= W.force
 				if (prob(W.force*3))
-					playsound(src.loc, 'sound/impact_sounds/Metal_Clang_1.ogg', 50, 1, -1)
+					playsound(src.loc, 'sound/impact_sounds/Metal_Clang_1.ogg', 50, 1, SOUND_RANGE_STANDARD)
 					for (var/mob/M in src)
 						M.changeStatus("weakened",1 SECONDS)
 						M.show_text("The physical shock of the blow knocks you around!", "red")
@@ -849,7 +849,7 @@
 			SC.on_shipdeath()
 
 		for(T in range(src,1))
-			make_cleanable(/obj/decal/cleanable/machine_debris, T)
+			new /obj/decal/cleanable/machine_debris( T)
 
 		qdel (src)
 ///////////////////////////////////////////////////////////////////////////
@@ -1467,7 +1467,7 @@
 	SS.Clickdrag_ObjectToPod(user,O)
 	return
 
-/obj/machinery/vehicle/MouseDrop(over_object, src_location, over_location)
+/obj/machinery/vehicle/mouse_drop(over_object, src_location, over_location)
 	if (!usr.client || !isliving(usr))
 		return
 	if (is_incapacitated(usr))
@@ -1924,7 +1924,7 @@
 			succeeding = 1
 			did_warp = 1
 
-			playsound(src.loc, "warp", 50, 1, 0.1, 0.7)
+			playsound(src.loc, "warp", 50, 1, SOUND_RANGE_STANDARD, 0.7)
 
 			var/obj/portal/P = new()
 			P.set_loc(get_turf(src))
@@ -1951,7 +1951,7 @@
 				while(src)
 					step(src,src.dir)
 					if(prob(50))
-						make_cleanable(/obj/decal/cleanable/robot_debris/gib, src.loc)
+						new /obj/decal/cleanable/robot_debris/gib( src.loc)
 					if(prob(20) && pilot)
 						boutput(pilot, "<span class='alert'>You fall out of the rapidly disintegrating escape sub!</span>")
 						src.leave_pod(pilot)

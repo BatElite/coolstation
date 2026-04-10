@@ -258,7 +258,7 @@
 			owner.filters -= filter
 			filter = null
 			if(src.leave_cleanable)
-				var/obj/decal/cleanable/molten_item/I = make_cleanable(/obj/decal/cleanable/molten_item,get_turf(owner))
+				var/obj/decal/cleanable/molten_item/I = new /obj/decal/cleanable/molten_item(get_turf(owner))
 				I.desc = "Looks like this was \an [owner] some time ago."
 
 			if(src.mob_owner && owner.loc == src.mob_owner)
@@ -877,7 +877,7 @@
 			counter += timePassed
 			if (counter >= count && owner && !owner.hasStatus(list("weakened", "paralysis")) )
 				counter -= count
-				playsound(owner, sound, 17, 1, 0.4, 1.6)
+				playsound(owner, sound, 17, 1, SOUND_RANGE_MODERATE, 1.6)
 				violent_twitch(owner)
 			. = ..(timePassed)
 
@@ -898,7 +898,7 @@
 			counter += timePassed
 			if (counter >= count && owner)
 				counter -= count
-				playsound(owner, sound, 17, 1, 0.4, 1.6)
+				playsound(owner, sound, 17, 1, SOUND_RANGE_MODERATE, 1.6)
 				violent_twitch(owner)
 			. = ..(timePassed)
 
@@ -1503,7 +1503,7 @@
 		var/mob/M = owner
 		if(istype(M))
 			M.thermoregulation_mult /= 3
-
+//a
 /datum/statusEffect/maxhealth/decreased/hungry
 	id = "hungry"
 	name = "Hungry"
@@ -1511,13 +1511,18 @@
 	icon_state = "heart-"
 	duration = INFINITE_STATUS
 	maxDuration = null
-	change = -20
+	change = -10
 
 	onAdd(optional=null)
 		. = ..(change)
 
 	onChange(optional=null)
 		. = ..(change)
+
+	onUpdate(optional=null)
+		var/mob/M = owner
+		if (!M.nutrition || M.nutrition >= 100)
+			M.delStatus("hungry")
 
 /datum/statusEffect/staminaregen/thirsty
 	id = "thirsty"
@@ -1618,6 +1623,8 @@
 				if(how_miasma > 4)
 					. += " You might get sick."
 				#endif
+
+/*
 /datum/statusEffect/sandy
 	id = "sandy"
 	name = "Sandy"
@@ -1641,7 +1648,7 @@
 				S = locate(/obj/decal/cleanable/sand) in T
 			if	(!S)
 				if(prob(30))
-					S = make_cleanable(/obj/decal/cleanable/sand, T)
+					S = new /obj/decal/cleanable/sand( T)
 			var/list/states = M.get_step_image_states()
 			if(S)
 				if (states[1] || states[2])
@@ -1651,6 +1658,7 @@
 						S.create_overlay(states[2], "#9a865a", direct, 'icons/obj/decals/blood.dmi') //awawa
 				else
 					S.create_overlay("smear2", "#9a865a", direct, 'icons/obj/decals/blood.dmi')
+*/
 
 /datum/statusEffect/dripping_paint
 	id = "marker_painted"
@@ -1684,7 +1692,7 @@
 		if (T.messy > 0)
 			P = locate(/obj/decal/cleanable/paint) in T
 		if(!P)
-			P = make_cleanable(/obj/decal/cleanable/paint, T)
+			P = new /obj/decal/cleanable/paint( T)
 
 		var/list/states = M.get_step_image_states()
 
@@ -1695,6 +1703,32 @@
 				P.create_overlay(states[2], "#ff8820", direct, 'icons/obj/decals/blood.dmi')
 		else
 			P.create_overlay("smear2", "#ff8820", direct, 'icons/obj/decals/blood.dmi')
+
+
+/client/var/crab
+
+/datum/statusEffect/crab
+	id = "crab"
+	name = "Crabbed"
+	desc = "A CRAB IS PINCHING YOUR PENIS!"
+	icon_state = "crab"
+	unique = TRUE
+	maxDuration = 30 MINUTES
+
+	onAdd(optional)
+		. = ..()
+		if (!ishuman(owner)) return
+		boutput(owner,"Oh fuck. OH CHRIST.")
+		var/client/C = owner:client
+		if(istype(C))
+			C.crab = TRUE
+
+	onRemove()
+		. = ..()
+		var/client/C = owner:client
+		if(istype(C))
+			C.crab = FALSE
+		boutput(owner,"Oh thank god that's over with.")
 
 /datum/statusEffect/magnetized
 	id = "magnetized"
@@ -1744,7 +1778,7 @@
 		animate(owner, pixel_y = 0)
 		REMOVE_ATOM_PROPERTY(ffs, PROP_ATOM_FLOATING, src)
 		REMOVE_ATOM_PROPERTY(ffs, PROP_NO_MOVEMENT_PUFFS, src)
-		var/turf/space/fluid/warp_z5/trenchhole = owner.loc
+		var/turf/space/fluid/ocean/warp_z5/trenchhole = owner.loc
 		ON_COOLDOWN(owner,"re-swim", 0.5 SECONDS) //Small cooldown so the trench hole doesn't immediately put the mob on swimming again (they plummet instead :D)
 		var/end_z_cross = TRUE
 		if (ishuman(src)) //let jetpack fans go up and down
@@ -1851,9 +1885,30 @@
 			if (prob(10) && ismob(owner))
 				var/mob/victim = owner
 				victim.emote(pick("cough", "blink"))
-			playsound(owner, sound, 17, TRUE, 0.4, 1.6)
+			playsound(owner, sound, 17, TRUE, SOUND_RANGE_MODERATE, 1.6)
 			violent_twitch(owner)
 		. = ..(timePassed)
+
+/datum/statusEffect/hand_warmer
+	id = "hand_warmer"
+	name = "warm (hand warmer)"
+	desc = "A hand warmer is heating you up."
+	icon_state = "warm"
+	maxDuration = 6000
+	unique = 1
+
+	var/tickCount = 0
+	var/tickSpacing = 20
+
+	onUpdate(timePassed)
+		tickCount += timePassed
+		var/times = (tickCount / tickSpacing)
+		if(times >= 1 && ismob(owner))
+			tickCount -= (round(times) * tickSpacing)
+			var/mob/M = owner
+			if (M.bodytemperature < M.base_body_temp + 10)
+				for(var/i in 1 to times)
+					M.bodytemperature += 6
 
 ///give lings a timer to look at on this. The ability cooldown already functioned as such, but this is more explicit.
 /datum/statusEffect/regenerative_stasis

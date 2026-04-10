@@ -17,7 +17,7 @@
 	inventory_counter_enabled = TRUE
 	flags = FPRINT | TABLEPASS | OPENCONTAINER
 	rc_flags = RC_SCALE | RC_SPECTRO | RC_INV_COUNT_AMT
-	initial_volume = 400
+	initial_volume = 4 LITRES
 	can_recycle = FALSE
 	//can_chug = 0
 	initial_reagents = "fuel"
@@ -45,8 +45,8 @@
 	var/base_icon_state = "chemtank"
 	icon_state = "chemtank-closed"
 	item_state = "chemtank"
-	initial_volume = 1000
-	flags = OPENCONTAINER
+	initial_volume = 10 LITRES
+	flags = FPRINT | OPENCONTAINER | CANT_FIT_IN_CRATES | SUPPRESSATTACK
 	w_class = W_CLASS_HUGE
 	incompatible_with_chem_dispensers = 1
 	throw_speed = 0.33
@@ -55,7 +55,6 @@
 	can_chug = FALSE
 	two_handed = TRUE
 	p_class = 2
-	cannot_be_stored = TRUE
 	c_flags = EQUIPPED_WHILE_HELD
 
 	New()

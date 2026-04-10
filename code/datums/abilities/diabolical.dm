@@ -219,7 +219,7 @@
 			return 1
 
 		holder.owner.visible_message("<span class='alert'><b>[holder.owner] shoots finger guns in [target]s direction.</b></span>")
-		playsound(holder.owner.loc, "sound/effects/fingersnap.ogg", 50, 0, -1)
+		playsound(holder.owner.loc, "sound/effects/fingersnap.ogg", 50, 0, SOUND_RANGE_STANDARD)
 
 		if (H.traitHolder.hasTrait("training_chaplain"))
 			boutput(holder.owner, "<span class='alert'>[H] has divine protection from magic.</span>")
@@ -243,7 +243,7 @@
 
 	cast(atom/T)
 		holder.owner.say("So long folks!")
-		playsound(holder.owner.loc, "sound/voice/wizard/BlinkGrim.ogg", 50, 0, -1)
+		playsound(holder.owner.loc, "sound/voice/wizard/BlinkGrim.ogg", 50, 0, SOUND_RANGE_STANDARD)
 		sleep(0.5 SECONDS)
 
 		if(!spawnturf)
@@ -463,7 +463,7 @@
 		if(t in src.c_char_to_symbol)
 			t = src.c_char_to_symbol[t]
 
-		var/obj/decal/cleanable/writing/spooky/G = make_cleanable(/obj/decal/cleanable/writing/spooky,T)
+		var/obj/decal/cleanable/writing/spooky/G = new /obj/decal/cleanable/writing/spooky(T)
 		G.artist = user.key
 
 		logTheThing("station", user, null, "writes on [T] with [src] [log_loc(T)]: [t]")
